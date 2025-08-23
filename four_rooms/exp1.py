@@ -1,8 +1,40 @@
 import numpy as np
 from matplotlib import pyplot as plt
-import deepdish as dd
+import h5py
 from GridWorld import GridWorld
 from library import *
+from deepdish import io
+
+
+def load_value_function(file_path: str, extended=False):
+    """Load deepdish file into numpy array"""
+    def extract_index(key):
+        """Extract integer index from key string like 'i0' -> 0"""
+        return int(key[1:])
+
+    with h5py.File(file_path, "r") as f:
+        data_group = f['data']
+
+        Qs = [
+            {
+                extract_index(state): np.array(data_group[task][state]["i1"])  # (num_actions,)
+                for state in sorted(data_group[task].keys(), key=extract_index)
+            }
+            for task in sorted(data_group.keys(), key=extract_index)
+        ]
+        if extended:
+            Qs = [
+                {
+                    extract_index(state): {
+                        extract_index(goal): np.array(data_group[task][state]["i1"][goal]["i1"][:])  # (num_actions,)
+                        for goal in sorted(data_group[task][state].keys(), key=extract_index)
+                    }
+                    for state in sorted(data_group[task].keys(), key=extract_index)
+                }
+                for task in sorted(data_group.keys(), key=extract_index)
+            ]
+
+        return Qs
 
 
 env = GridWorld()
@@ -28,9 +60,10 @@ Tasks = [
     [(3, 9), (9, 3)],
 ]
 
-Qs = dd.io.load("exps_data/4Goals_Optimal_Qs.h5")
+Qs = io.load("exps_data/4Goals_Optimal_Qs.h5")
 Qs = [{s: v for (s, v) in Q} for Q in Qs]
-EQs = dd.io.load("exps_data/4Goals_Optimal_EQs.h5")
+
+EQs = io.load("exps_data/4Goals_Optimal_EQs.h5")
 EQs = [{s: {s__: v__ for (s__, v__) in v} for (s, v) in EQ} for EQ in EQs]
 
 num_runs = 1
