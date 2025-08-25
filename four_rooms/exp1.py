@@ -2,8 +2,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 import h5py
 from GridWorld import GridWorld
-from library import *
-from deepdish import io
+from library import Q_learning, Goal_Oriented_Q_learning
+import deepdish as dd
 
 
 def load_value_function(file_path: str, extended=False):
@@ -36,6 +36,24 @@ def load_value_function(file_path: str, extended=False):
 
         return Qs
 
+def count_states(Qs):
+    """Count the number of states in the Qs.
+    
+    States are represented as strings like '[None, (3,3)]' or '[(3,3), (3,3)]' or '[None, None]'.
+    Intermediate states have one None and one non-None (e.g. (3,3)).
+    None state is '[None, None]'.
+    Goal states dont have a None.
+    """
+    count = len(Qs[0].keys())
+    intermediate = len([key for key in Qs[0].keys() if key[1:5] == 'None'])
+    terminal = len([key for key in Qs[0].keys() if key[1:5] != 'None'])
+    none_state = [key for key in Qs[0].keys() if key == '[None, None]']
+    print(
+        f"There are {count} states"
+        f" = {intermediate} (intermediate)"
+        f" + {terminal} (terminal)"
+        f" + {len(none_state)} (none state)"
+    )
 
 env = GridWorld()
 maxiter = 300
@@ -60,11 +78,13 @@ Tasks = [
     [(3, 9), (9, 3)],
 ]
 
-Qs = io.load("exps_data/4Goals_Optimal_Qs.h5")
+Qs = dd.io.load("exps_data/4Goals_Optimal_Qs.h5")
 Qs = [{s: v for (s, v) in Q} for Q in Qs]
+count_states(Qs)
 
-EQs = io.load("exps_data/4Goals_Optimal_EQs.h5")
+EQs = dd.io.load("exps_data/4Goals_Optimal_EQs.h5")
 EQs = [{s: {s__: v__ for (s__, v__) in v} for (s, v) in EQ} for EQ in EQs]
+count_states(EQs)
 
 num_runs = 1
 dataQ = np.zeros((num_runs, len(Tasks)))
@@ -84,5 +104,6 @@ for i in range(num_runs):
         _, stats = Goal_Oriented_Q_learning(env, Q_optimal=EQs[j])
         dataEQ[i, j] = stats["T"]
 
+np.object = object # Hack to avoid error in save
 data1 = dd.io.save("exps_data/exp1_samples_Qs.h5", dataQ)
 data2 = dd.io.save("exps_data/exp1_samples_EQs.h5", dataEQ)

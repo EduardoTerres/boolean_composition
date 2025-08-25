@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import deepdish as dd
 from GridWorld import GridWorld
-from library import *
+from library import Q_learning, Goal_Oriented_Q_learning
 
 
 env = GridWorld()
@@ -116,5 +116,6 @@ for i in range(num_runs):
         _, stats = Goal_Oriented_Q_learning(env, Q_optimal=EQs[j])
         dataEQ[i, j] = stats["T"]
 
+np.object = object # Hack to avoid error in save
 data1 = dd.io.save("exps_data/exp2_samples_Qs.h5", dataQ)
 data2 = dd.io.save("exps_data/exp2_samples_EQs.h5", dataEQ)
