@@ -15,7 +15,6 @@ import deepdish as dd
 def plot1():
     n = np.linspace(1, 50, 50)
     everything = 2 ** (2**n)
-    fact = np.array([np.math.factorial(x) for x in n])
     OR = 2**n - 1
     standard = n
 
@@ -28,14 +27,14 @@ def plot1():
         "legend.fontsize": 25,
     }
     sns.set(rc=rc_, style="darkgrid")
-    rc("text", usetex=True)
+    # rc("text", usetex=True)
 
     fig, ax = plt.subplots()
     plt.plot(everything, linewidth=5.0, label="Boolean task algebra")
     plt.plot(OR, linewidth=5.0, label="Disjunction only")
     plt.plot(standard, linewidth=5.0, label="No transfer")
     # plt.plot(fact, '--', label="reference, n!")
-    plt.yscale("log", basey=10)
+    plt.yscale("log", base=10)
     plt.xlim(1, 10)
     plt.ylim(1, 10**18)
     plt.legend()
@@ -66,7 +65,7 @@ def plot2():
         "legend.fontsize": 25,
     }
     sns.set(rc=rc_, style="darkgrid")
-    rc("text", usetex=True)
+    rc("text", usetex=False)
 
     fig, ax = plt.subplots()
     ax.bar(
@@ -92,8 +91,8 @@ def plot2():
     plt.ylabel("Cumulative timesteps to converge")
     ax.yaxis.get_major_formatter().set_powerlimits((0, 1))
     plt.xlim(0, 17)
-    plt.show()
-    fig.savefig("plots/cum_bar.pdf", bbox_inches="tight")
+    # plt.show()
+    fig.savefig("four_rooms/plots/cum_bar.png", bbox_inches="tight")
 
 
 # #####################################################################################
@@ -124,7 +123,7 @@ def plot3():
         "legend.fontsize": 25,
     }
     sns.set(rc=rc_, style="darkgrid")
-    rc("text", usetex=True)
+    rc("text", usetex=False)
 
     fig, ax = plt.subplots()
     ax.bar(
@@ -152,7 +151,7 @@ def plot3():
     # ax.ticklabel_format(axis='y',style='scientific', useOffset=True)
     fig.tight_layout()
     plt.show()
-    fig.savefig("plots/40goals_cum_bar.pdf", bbox_inches="tight")
+    fig.savefig("four_rooms/plots/40goals_cum_bar.png", bbox_inches="tight")
 
 
 #####################################################################################
@@ -297,8 +296,8 @@ def plot5():
         fig.savefig("plots/dense_sp_" + str(i) + ".pdf", bbox_inches="tight")
 
 
-plot1()
-plot2()
+# plot1()
+# plot2()
 plot3()
-plot4()
-plot5()
+# plot4()
+# plot5()

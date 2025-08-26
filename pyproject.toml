@@ -55,6 +55,7 @@ dependencies = [
     "torch",
     "torchvision",
     "tornado",
+    "tqdm>=4.67.1",
 ]
 
 [project.optional-dependencies]

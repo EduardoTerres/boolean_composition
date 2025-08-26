@@ -1,5 +1,4 @@
 import numpy as np
-from matplotlib import pyplot as plt
 import deepdish as dd
 from GridWorld import GridWorld
 from library import Q_learning, Goal_Oriented_Q_learning
@@ -15,7 +14,7 @@ T_states = [
     (1, 2),
     (1, 3),
     (1, 4),
-    (1, 5),
+    (1, 5),  # (1, 6) missing
     (1, 7),
     (1, 8),
     (1, 9),
@@ -25,7 +24,7 @@ T_states = [
     (11, 2),
     (11, 3),
     (11, 4),
-    (11, 5),
+    (11, 5),  # (11, 6) missing
     (11, 7),
     (11, 8),
     (11, 9),
@@ -33,7 +32,7 @@ T_states = [
     (2, 1),
     (3, 1),
     (4, 1),
-    (5, 1),
+    (5, 1),  # (6, 1) missing
     (7, 1),
     (8, 1),
     (9, 1),
@@ -42,7 +41,7 @@ T_states = [
     (3, 11),
     (4, 11),
     (5, 11),
-    (6, 11),
+    (6, 11),  # (7, 11) missing
     (8, 11),
     (9, 11),
     (10, 11),
@@ -54,22 +53,16 @@ BTasksQ = [[t] for t in T_states]
 ###################################### EQs
 Bases = []
 n = int(np.ceil(np.log2(len(T_states))))
-m = (2**n) / 2
+m = (2 ** n) / 2
 for i in range(n):
     Bases.append([])
     b = False
-    for j in range(0, 2**n):
+    for j in range(0, 2 ** n):
         if j >= len(T_states):
             break
-        if b:
-            Bases[i].append(1)  # 1=True=rmax
-        else:
-            Bases[i].append(0)  # 0=False=rmin
+        Bases[i].append(1 if b else 0) # 1=True=rmax, 0=False=rmin
         if (j + 1) % m == 0:
-            if b:
-                b = False
-            else:
-                b = True
+            b = not b
     m = m / 2
 
 BTasksEQ = []
@@ -91,6 +84,8 @@ EQs = [{s: {s__: v__ for (s__, v__) in v} for (s, v) in EQ} for EQ in EQs]
 num_runs = 1
 dataQ = np.zeros((num_runs, len(BTasksQ)))
 dataEQ = np.zeros((num_runs, len(BTasksEQ)))
+
+# Qs
 idxs = np.arange(len(BTasksQ))
 for i in range(num_runs):
     print("run: ", i)
@@ -103,6 +98,8 @@ for i in range(num_runs):
         )
         _, stats = Q_learning(env, Q_optimal=Qs[j])
         dataQ[i, j] = stats["T"]
+
+# EQs
 idxs = np.arange(len(BTasksEQ))
 for i in range(num_runs):
     print("run: ", i)

@@ -1,9 +1,14 @@
 import numpy as np
-from matplotlib import pyplot as plt
 import deepdish as dd
 from GridWorld import GridWorld
-from library import *
-
+from tqdm import tqdm
+from library import (
+    EQ_P,
+    AND,
+    OR,
+    NOT,
+    Goal_Oriented_Q_learning,
+)
 
 T_states = [(3, 3), (3, 9), (9, 3), (9, 9)]
 T_states = [[pos, pos] for pos in T_states]
@@ -28,7 +33,7 @@ Tasks = [
     [(3, 9), (9, 3)],
 ]
 
-# Sparse rewards, Same terminal states
+# (Sparse rewards, Same terminal states)
 types = [(True, True), (True, False), (False, True), (False, False)]
 
 maxiter = 500
@@ -110,8 +115,10 @@ for t in range(len(types)):
 
     num_runs = num_runs
     data = np.zeros((num_runs, len(Tasks)))
-    for i in range(num_runs):
+    for i in tqdm(range(num_runs), desc="Runs"):
         for j in range(len(Tasks)):
             goals = [[pos, pos] for pos in Tasks[j]]
             data[i, j] = evaluate(goals, composed[j])
+
+    np.object = object  # Hack to avoid error in save
     data1 = dd.io.save("exps_data/exp3_returns_" + str(t) + ".h5", data)

@@ -1,6 +1,4 @@
 import numpy as np
-from matplotlib import pyplot as plt
-import h5py
 from GridWorld import GridWorld
 from library import Q_learning, Goal_Oriented_Q_learning
 import deepdish as dd
@@ -8,6 +6,8 @@ import deepdish as dd
 
 def load_value_function(file_path: str, extended=False):
     """Load deepdish file into numpy array"""
+    import h5py
+
     def extract_index(key):
         """Extract integer index from key string like 'i0' -> 0"""
         return int(key[1:])
