@@ -222,7 +222,7 @@ def plot4():
         showfliers=False,
     )
     plt.show()
-    fig.savefig("plots/dense.pdf", bbox_inches="tight")
+    fig.savefig("four_rooms/plots/dense.png", bbox_inches="tight")
 
 
 #####################################################################################
@@ -292,12 +292,12 @@ def plot5():
             linewidth=3,
             showfliers=False,
         )
-        plt.show()
-        fig.savefig("plots/dense_sp_" + str(i) + ".pdf", bbox_inches="tight")
+        # plt.show()
+        fig.savefig("four_rooms/plots/dense_sp_" + str(i) + ".png", bbox_inches="tight")
 
 
 # plot1()
 # plot2()
-plot3()
+# plot3()
 # plot4()
-# plot5()
+plot5()

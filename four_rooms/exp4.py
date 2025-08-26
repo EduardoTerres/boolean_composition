@@ -1,8 +1,14 @@
 import numpy as np
-from matplotlib import pyplot as plt
 import deepdish as dd
+from tqdm import tqdm
 from GridWorld import GridWorld
-from library import *
+from library import (
+    AND,
+    OR,
+    NOT,
+    Goal_Oriented_Q_learning,
+    EQ_P,
+)
 
 
 T_states = [(3, 3), (3, 9), (9, 3), (9, 9)]
@@ -28,9 +34,9 @@ Tasks = [
     [(3, 9), (9, 3)],
 ]
 
-# Sparse rewards, Same terminal states
+# (Sparse rewards, Same terminal states)
 types = [(True, True), (True, False), (False, True), (False, False)]
-t = 3
+t = 3  # Dense rewards, not same terminal states
 
 # Slip probabilities
 slip_probs = [0, 0.1, 0.2, 0.3]
@@ -134,8 +140,10 @@ for sp in range(len(slip_probs)):
     #    env.render( P=EQ_P(EQ), V = EQ_V(EQ))
 
     data = np.zeros((num_runs, len(Tasks)))
-    for i in range(num_runs):
+    for i in tqdm(range(num_runs), desc="Runs"):
         for j in range(len(Tasks)):
             goals = [[pos, pos] for pos in Tasks[j]]
             data[i, j] = evaluate(goals, composed[j], slip_prob=slip_prob)
+
+    np.object = object  # Hack to avoid error in save
     data1 = dd.io.save("exps_data/exp4_returns_" + str(sp) + ".h5", data)

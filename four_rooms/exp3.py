@@ -113,6 +113,12 @@ for t in range(len(types)):
     # for EQ in composed:
     #    env.render( P=EQ_P(EQ), V = EQ_V(EQ))
 
+    # Save base tasks A and B
+    # np.object = object  # Hack to avoid error in save
+    
+    # dd.io.save("exps_data/exp3_base_tasks_A_" + str(t) + ".h5", A)
+    # dd.io.save("exps_data/exp3_base_tasks_B_" + str(t) + ".h5", B)
+
     num_runs = num_runs
     data = np.zeros((num_runs, len(Tasks)))
     for i in tqdm(range(num_runs), desc="Runs"):

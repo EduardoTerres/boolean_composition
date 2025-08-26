@@ -104,6 +104,8 @@ for i in range(num_runs):
         _, stats = Goal_Oriented_Q_learning(env, Q_optimal=EQs[j])
         dataEQ[i, j] = stats["T"]
 
+print(EQs)
+
 np.object = object # Hack to avoid error in save
 data1 = dd.io.save("exps_data/exp1_samples_Qs.h5", dataQ)
 data2 = dd.io.save("exps_data/exp1_samples_EQs.h5", dataEQ)
