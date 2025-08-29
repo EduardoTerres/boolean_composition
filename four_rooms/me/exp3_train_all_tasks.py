@@ -36,7 +36,6 @@ Tasks = [
 types = [(True, True), (True, False), (False, True), (False, False)]
 
 maxiter = 500
-num_runs = 100000
 
 
 def evaluate(goals, EQ):
