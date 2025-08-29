@@ -46,10 +46,9 @@ for state in EQs_A.keys():
 print("✅ The learned state-action slice for the intersection goal is the same for both base tasks.")
 
 # ------------------------------
-# Test 2 - All tasks
+# Test 2 - All tasks trained from scratch
 # ------------------------------
-EQs_all = dd.io.load("exps_data/4Goals_Optimal_EQs.h5")
-EQs_all = [{s: {s__: v__ for (s__, v__) in v} for (s, v) in EQ} for EQ in EQs_all]
+EQs_all = dd.io.load("exps_data/exp3_EQs_all_tasks0.h5")
 
 # EQs_all is a list of 16 elements, positionally corresponding to the tasks in the Tasks list
 task_to_EQs = {str(task): eq for task, eq in zip(Tasks, EQs_all)}
@@ -63,7 +62,7 @@ for goal in Goal_positions:
 
 mismatch_count = 0
 match_count = 0
-for goal in T_states[3:4]:
+for goal in T_states:
     print("Testing goal: ", goal)
     for state in states:
         tasks_with_goal = inverted_goal_index[str(goal)]
@@ -87,21 +86,7 @@ for goal in T_states[3:4]:
                         mismatch_count += 1
 
 # Print the counts after all states have been checked
-print(f"❌ {mismatch_count} out of {mismatch_count + match_count} mismatches.")
-print(f"✅ {match_count} out of {mismatch_count + match_count} matches.")
-
-# Testing goal:  [(3, 3), (3, 3)]
-# ❌ 160230 out of 659232 mismatches.
-# ✅ 499002 out of 659232 matches.
-
-# Testing goal:  [(3, 9), (3, 9)]
-# ❌ 160230 out of 659232 mismatches.
-# ✅ 499002 out of 659232 matches.
-
-# Testing goal:  [(9, 3), (9, 3)]
-# ❌ 0 out of 659232 mismatches.
-# ✅ 659232 out of 659232 matches.
-
-# Testing goal:  [(9, 9), (9, 9)]
-# ❌ 274680 out of 659232 mismatches.
-# ✅ 384552 out of 659232 matches.
+if mismatch_count > 0:
+    print(f"❌ {mismatch_count} out of {mismatch_count + match_count} mismatches.")
+if match_count > 0:
+    print(f"✅ {match_count} out of {mismatch_count + match_count} matches.")
