@@ -73,7 +73,7 @@ for task in tqdm(Tasks, desc="Training tasks"):
         dense_rewards=not types[t][0],
         T_states=T_states if types[t][1] else goals,
     )
-    Q, stats1 = Goal_Oriented_Q_learning(
+    Q, _ = Goal_Oriented_Q_learning(
         env, maxiter=maxiter, T_states=None if types[t][1] else T_states
     )
     EQs_learned.append(Q)
