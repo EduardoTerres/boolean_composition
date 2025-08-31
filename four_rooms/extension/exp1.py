@@ -144,4 +144,8 @@ for num_rooms in [4, 9, 16]:
     task_to_EQs = dd.io.load(fname)
     equal_on_shared_goals(task_to_EQs=task_to_EQs)
 
-
+# Results of execution:
+# Test base tasks from original experiments of 4 rooms ✅ 1/1 goal slices match.
+# Loading: rooms=4, goals=3, tasks=50, env=0, maxiter=2000 ✅ 105/105 goal slices match.
+# Loading: rooms=9, goals=3, tasks=50, env=0, maxiter=2000 ✅ 3303/3303 goal slices match.
+# Loading: rooms=16, goals=3, tasks=50, env=0, maxiter=2000 ✅ 4828/4828 goal slices match.
