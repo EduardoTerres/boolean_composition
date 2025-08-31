@@ -168,9 +168,11 @@ def Goal_Oriented_Q_learning(
         for state in T_states:
             sMem[str(state)] = 0
 
-    stop_cond = lambda k: k < maxiter
+    def stop_cond(k):
+        return k < maxiter
     if Q_optimal:
-        stop_cond = lambda _: not EQ_equal(Q_optimal, Q)
+        def stop_cond(_):
+            return not EQ_equal(Q_optimal, Q)
 
     stats = {"R": [], "T": 0}
     k = 0

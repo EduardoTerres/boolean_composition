@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as colors
 from collections import defaultdict
+from four_rooms.config import MAP_4, MAP_9, MAP_16
 
 # Defining actions
 UP = 0
@@ -29,25 +30,15 @@ COLOURS = {
 
 class GridWorld(gym.Env):
     metadata = {"render.modes": ["human"]}
-    MAP = (
-        "1 1 1 1 1 1 1 1 1 1 1 1 1\n"
-        "1 0 0 0 0 0 1 0 0 0 0 0 1\n"
-        "1 0 0 0 0 0 0 0 0 0 0 0 1\n"
-        "1 0 0 0 0 0 1 0 0 0 0 0 1\n"
-        "1 0 0 0 0 0 1 0 0 0 0 0 1\n"
-        "1 0 0 0 0 0 1 0 0 0 0 0 1\n"
-        "1 1 0 1 1 1 1 0 0 0 0 0 1\n"
-        "1 0 0 0 0 0 1 1 1 1 0 1 1\n"
-        "1 0 0 0 0 0 1 0 0 0 0 0 1\n"
-        "1 0 0 0 0 0 1 0 0 0 0 0 1\n"
-        "1 0 0 0 0 0 0 0 0 0 0 0 1\n"
-        "1 0 0 0 0 0 1 0 0 0 0 0 1\n"
-        "1 1 1 1 1 1 1 1 1 1 1 1 1"
-    )
+    MAP_INDEX = {
+        "MAP_4": MAP_4,
+        "MAP_9": MAP_9,
+        "MAP_16": MAP_16,
+    }
 
     def __init__(
         self,
-        MAP=MAP,
+        MAP="MAP_4",
         dense_rewards=False,
         goal_reward=2,
         step_reward=-0.1,
@@ -64,7 +55,7 @@ class GridWorld(gym.Env):
         self.possiblePositions = []
         self.walls = []
 
-        self.MAP = MAP
+        self.MAP = self.MAP_INDEX[MAP]
         self._map_init()
         self.diameter = (self.n + self.m) - 4
 
