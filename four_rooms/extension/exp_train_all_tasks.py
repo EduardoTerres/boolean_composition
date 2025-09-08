@@ -17,6 +17,23 @@ from four_rooms.config import (
     Config_16,
 )
 
+
+# ------------------------------------------------------------
+# Utils
+# ------------------------------------------------------------
+def convert_defaultdict_to_dict(obj):
+    """Convert defaultdict objects to regular dictionaries to avoid pickling issues."""
+    if isinstance(obj, defaultdict):
+        return {key: convert_defaultdict_to_dict(value) for key, value in obj.items()}
+    elif isinstance(obj, dict):
+        return {key: convert_defaultdict_to_dict(value) for key, value in obj.items()}
+    else:
+        return obj
+
+
+# ------------------------------------------------------------
+# Main
+# ------------------------------------------------------------
 NUM_ROOMS = 4
 if NUM_ROOMS == 4:
     Config = Config_4
@@ -77,15 +94,6 @@ for task in Tasks:
     )
     EQs_learned.append(Q)
     pbar.update(1)
-
-# Convert defaultdict objects to regular dictionaries to avoid pickling issues
-def convert_defaultdict_to_dict(obj):
-    if isinstance(obj, defaultdict):
-        return {key: convert_defaultdict_to_dict(value) for key, value in obj.items()}
-    elif isinstance(obj, dict):
-        return {key: convert_defaultdict_to_dict(value) for key, value in obj.items()}
-    else:
-        return obj
 
 # Convert all Q objects to regular dictionaries
 EQs_learned_converted = [convert_defaultdict_to_dict(eq) for eq in EQs_learned]

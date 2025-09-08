@@ -2,16 +2,11 @@ import deepdish as dd
 import numpy as np
 from tqdm import tqdm
 
-from four_rooms.config import (
-    T_states_4,
-    Bases_4,
-    Tasks_4,
-    Goals_4,
-    T_states_16,
-    Tasks_16,
-    Goals_16,
-)
+from four_rooms.config import Bases_4
 
+# ------------------------------------------------------------
+# Utils
+# ------------------------------------------------------------
 def equal_on_shared_goals(
     task_to_EQs,
     tol=1e-9
