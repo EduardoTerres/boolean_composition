@@ -52,58 +52,6 @@ def equal_on_shared_goals(
     if stats["match_count"] > 0:
         print(f"✅ {stats['match_count']}/{stats['mismatch_count'] + stats['match_count']} goal slices match.")
 
-def equal_on_shared_goals_invidx(
-    task_to_EQs,
-    tasks,
-    goals,
-    tol=1e-9
-):
-    """Check that the state-action slices of all tasks that contain a shared goal are the same.
-
-    This function creates an inverted index of goals and tasks that contain that goal, and then
-    compares the state-action slices of all tasks that contain a shared goal among each other.
-    Each match signifies a match of between two tasks on one of their shared goals.
-
-    Args:
-        task_to_EQs: Dictionary mapping tasks to EQs learned for those tasks
-        goals: List of goals
-        tol: Tolerance for checking equality
-
-    Returns:
-        None
-    """
-    # Create inverted index of goals and tasks that contain that goal
-    inverted_goal_index = {}
-    for goal in goals:
-        inverted_goal_index[goal] = [task for task in tasks if goal in task]
-    stats = {
-        "mismatch_count": 0,
-        "match_count": 0,
-    }
-    for goal in tqdm(goals, desc="Checking shared goals"):
-        tasks_with_goal = inverted_goal_index[goal]
-        if len(tasks_with_goal) == 0:
-            continue
-        
-        # Compare all tasks containing goal among each other
-        for idx_i, task_i in enumerate(tasks_with_goal):
-            for idx_j, task_j in enumerate(tasks_with_goal):
-                if idx_i <= idx_j:
-                    continue
-                EQs_i = task_to_EQs[tuple(task_i)]
-                EQs_j = task_to_EQs[tuple(task_j)]
-
-                matches = [
-                    np.max(np.abs(EQs_i[state][str([goal, goal])] - EQs_j[state][str([goal, goal])])) < tol
-                    for state in EQs_i.keys()
-                ]
-                stats["mismatch_count" if not all(matches) else "match_count"] += 1
-
-    # Print the counts after all states have been checked
-    if stats["mismatch_count"] > 0:
-        print(f"❌ {stats['mismatch_count']} out of {stats['mismatch_count'] + stats['match_count']} mismatches.")
-    if stats["match_count"] > 0:
-        print(f"✅ {stats['match_count']} out of {stats['mismatch_count'] + stats['match_count']} matches.")
 
 # ------------------------------------------------------------
 # Test 1 - Base tasks from original experiments of 4 rooms
@@ -115,7 +63,7 @@ print("Test base tasks from original experiments of 4 rooms", end=" ")
 equal_on_shared_goals(task_to_EQs={tuple(Bases_4[0]): EQs_A, tuple(Bases_4[1]): EQs_B})
 
 # ------------------------------------------------------------
-# Test 2 - Randomly sampled tasks trained from scratch
+# Test 2 - Equal on shared goals for randomly sampled tasks trained from scratch
 # ------------------------------------------------------------
 def parse_filename(fname, print_params=False):
     """Parse filename to extract experiment parameters.
@@ -144,3 +92,7 @@ for num_rooms in [4, 9, 16]:
 # Loading: rooms=4, goals=3, tasks=50, env=0, maxiter=2000 ✅ 105/105 goal slices match.
 # Loading: rooms=9, goals=3, tasks=50, env=0, maxiter=2000 ✅ 3303/3303 goal slices match.
 # Loading: rooms=16, goals=3, tasks=50, env=0, maxiter=2000 ✅ 4828/4828 goal slices match.
+
+# ------------------------------------------------------------
+# Test 3 - Equal on non-shared goals for randomly sampled tasks trained from scratch
+# ------------------------------------------------------------
