@@ -6,7 +6,6 @@ from four_rooms.GridWorld import GridWorld
 from tqdm import tqdm
 from four_rooms.library import (
     EQ_P,
-    EQ_V,
     AND,
     OR,
     NOT,
@@ -59,15 +58,16 @@ def order_EQs(EQs, Partition):
 
     Returns:
         list: List of two EQ dictionaries, reordered so that each contains Q-values only for the goals in its partition.
+        The first EQ is for undesired; the second for desired.
     """
-    EQs_ordered = EQs.copy()  # [EQ_desired, EQ_undesired]
+    EQs_ordered = EQs.copy()  # [EQ_undesired, EQ_desired]
 
     # Append the desired tasks in the first position, and the undesired in the second
     for idx, EQ in enumerate(EQs):
         for goal in Goals:
             # Position state-action slice in index 0 if undesired, 1 if desired
             for state in EQ.keys():
-                desired = int(goal in Partition[idx])  # 1 if desired, 0 if undesired
+                desired = int(goal in Partition[idx])  # 0 if undesired, 1 if desired
                 EQs_ordered[desired][state][str([goal, goal])] = EQs[desired][state][str([goal, goal])]
     return EQs_ordered
 
@@ -80,6 +80,29 @@ def convert_defaultdict_to_dict(obj):
         return {key: convert_defaultdict_to_dict(value) for key, value in obj.items()}
     else:
         return obj
+
+
+def build_EQ(task, Goals, EQ_on, EQ_off):
+    """Compose an EQ for a specific task by combining Q-values from EQ_on (for task goals) and EQ_off (for non-task goals)."""
+    EQ = EQ_on.copy()
+    for state in EQ.keys():
+        for goal in task:  # Goal is on
+            EQ[state][str([goal, goal])] = EQ_on[state][str([goal, goal])]
+        for goal in set(Goals) - set(task):  # Goal is off
+            EQ[state][str([goal, goal])] = EQ_off[state][str([goal, goal])]
+    return EQ
+
+
+def get_composed_tasks(Tasks, Goals, EQ_on, EQ_off):
+    """Generate composed EQs for all tasks by combining Q-values from EQ_on (desired goals) and EQ_off (undesired goals).
+    
+    Returns the list of tasks with a one to one correspondence to the composed list.
+    """
+    EQs = []
+    for task in Tasks:
+        EQs.append(build_EQ(task, Goals, EQ_on, EQ_off))
+    return EQs
+
 
 # ------------------------------------------------------------
 # Experiment
@@ -96,16 +119,18 @@ elif NUM_ROOMS == 16:
 else:
     raise ValueError("Invalid number of rooms")
 
-Tasks, T_states, Goals = Config["Tasks"], Config["T_states"], Config["Goals"]
+T_states, Goals, Tasks = Config["T_states"], Config["Goals"], Config["Tasks"]
 
 Partition = get_random_partition(Config["Goals"])
+# Bases = [[(3, 3), (3, 9)], [(3, 3), (9, 3)]]
+# Partition = Bases
 print(f"Partitioned goal state into {Partition[0]} and {Partition[1]}.")
 
 # (Sparse rewards, Same terminal states)
 types = [(True, True), (True, False), (False, True), (False, False)]
 
 maxiter = 500
-num_runs = 1000
+num_runs = 10000
 
 EQs_all = {}
 Returns_all = {}
@@ -114,57 +139,39 @@ for t in range(len(types)):
     print("type: ", t)
 
     # Learning universal bounds (min and max tasks)
-    env = GridWorld(goals=T_states, dense_rewards=not types[t][0])
-    EQ_max, _ = Goal_Oriented_Q_learning(env, maxiter=maxiter)
+    # env = GridWorld(goals=T_states, dense_rewards=not types[t][0])
+    # EQ_max, _ = Goal_Oriented_Q_learning(env, maxiter=maxiter)
 
-    env = GridWorld(goals=T_states, goal_reward=-0.1, dense_rewards=not types[t][0])
-    EQ_min, _ = Goal_Oriented_Q_learning(env, maxiter=maxiter)
+    # env = GridWorld(goals=T_states, goal_reward=-0.1, dense_rewards=not types[t][0])
+    # EQ_min, _ = Goal_Oriented_Q_learning(env, maxiter=maxiter)
 
     # Learning base tasks and doing composed tasks
-    # EQs = []  # [EQ_desired, EQ_undesired]
-    # for goals_slice in Partition:
-    #     goals = [[pos, pos] for pos in goals_slice]
-    #     env = GridWorld(
-    #         goals=goals,
-    #         dense_rewards=not types[t][0],
-    #         T_states=T_states if types[t][1] else goals,
-    #     )
-    #     EQ, _ = Goal_Oriented_Q_learning(
-    #         env, maxiter=maxiter, T_states=None if types[t][1] else T_states
-    #     )
-    #     EQs.append(EQ)
+    EQs = []  # [EQ_desired, EQ_undesired]
+    for goals_slice in Partition:
+        goals = [[pos, pos] for pos in goals_slice]
+        env = GridWorld(
+            goals=goals,
+            dense_rewards=not types[t][0],
+            T_states=T_states if types[t][1] else goals,
+        )
+        EQ, _ = Goal_Oriented_Q_learning(
+            env, maxiter=maxiter, T_states=None if types[t][1] else T_states
+        )
+        EQs.append(EQ)
 
-    # EQs = order_EQs(EQs, Partition)
+    EQs_ordered = order_EQs(EQs, Partition)
 
-    # A, B = EQs[0], EQs[1]
-    A, B = EQ_min, EQ_max
-    NEG = lambda x: NOT(x, EQ_max=EQ_max, EQ_min=EQ_min)
-    XOR = lambda EQ1, EQ2: OR(AND(EQ1, NEG(EQ2)), AND(EQ2, NEG(EQ1)))
-    composed = [
-        EQ_min,
-        EQ_max,
-        AND(A, B),
-        AND(A, NEG(B)),
-        AND(B, NEG(A)),
-        NEG(OR(A, B)),
-        A,
-        NEG(A),
-        B,
-        NEG(B),
-        OR(A, B),
-        OR(A, NEG(B)),
-        OR(B, NEG(A)),
-        NEG(AND(A, B)),
-        NEG(XOR(A, B)),
-        XOR(A, B),
-    ]
+    EQ_off, EQ_on = EQs_ordered[0], EQs_ordered[1]
+
+    # EQ_off, EQ_on = EQ_min, EQ_max
+    EQs_composed = get_composed_tasks(Tasks, Goals, EQ_on, EQ_off)
 
     # Save base tasks A and B
     np.object = object  # Hack to avoid error in save
     
     EQs_save = {
-        "desired": A,
-        "undesired": B,
+        "desired": EQ_on,
+        "undesired": EQ_off,
     }
     EQs_all[t] = EQs_save
 
@@ -172,7 +179,7 @@ for t in range(len(types)):
     for i in tqdm(range(num_runs), desc="Runs"):
         for j in range(len(Tasks)):
             goals = [[pos, pos] for pos in Tasks[j]]
-            data[i, j] = evaluate(goals, composed[j])
+            data[i, j] = evaluate(goals, EQs_composed[j])
 
     Returns_all[t] = data
 
