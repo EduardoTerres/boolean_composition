@@ -2,7 +2,7 @@ import deepdish as dd
 import numpy as np
 from tqdm import tqdm
 
-from four_rooms.config import Bases_4
+from four_rooms.config import Bases_4, Goals_4
 
 # ------------------------------------------------------------
 # Utils
@@ -48,23 +48,59 @@ def equal_on_shared_goals(
     
     # Print the counts after all states have been checked
     if stats["mismatch_count"] > 0:
-        print(f"❌ {stats['mismatch_count']}/{stats['mismatch_count'] + stats['match_count']} goal slices mismatch.")
+        print(f"\n ❌ {stats['mismatch_count']}/{stats['mismatch_count'] + stats['match_count']} goal slices mismatch.")
     if stats["match_count"] > 0:
         print(f"✅ {stats['match_count']}/{stats['mismatch_count'] + stats['match_count']} goal slices match.")
 
 
-# ------------------------------------------------------------
-# Test 1 - Base tasks from original experiments of 4 rooms
-# ------------------------------------------------------------
-EQs_A = dd.io.load("exps_data/exp3_base_tasks_A_0.h5")
-EQs_B = dd.io.load("exps_data/exp3_base_tasks_B_0.h5")
+def equal_on_non_shared_goals(
+    task_to_EQs,
+    all_goals,
+    tol=1e-9
+):
+    """Check that the state-action slices of all tasks that contain a non-shared goal are the same.
 
-print("Test base tasks from original experiments of 4 rooms", end=" ")
-equal_on_shared_goals(task_to_EQs={tuple(Bases_4[0]): EQs_A, tuple(Bases_4[1]): EQs_B})
+    This function compares the state-action slices of all tasks that contain a non-shared goal among each other.
+    Each match signifies a match of between two tasks on one of their non-shared goals.
 
-# ------------------------------------------------------------
-# Test 2 - Equal on shared goals for randomly sampled tasks trained from scratch
-# ------------------------------------------------------------
+    Args:
+        EQs: List of EQs learned for the base tasks.
+        base_tasks: List of tasks where each task is represented as a list of goals. E.g., [(3, 3), (3, 9)] means
+                    the task is to reach the goals (3, 3) and (3, 9).
+        tol: Tolerance for checking equality.
+    """
+    stats = {
+        "mismatch_count": 0,
+        "match_count": 0,
+    }        
+    # Compare all tasks containing goal among each other
+    for idx_i, (task_i, EQ_i) in enumerate(task_to_EQs.items()):
+        for idx_j, (task_j, EQ_j) in enumerate(task_to_EQs.items()):
+            if idx_i <= idx_j:
+                continue
+
+            # Obtain intersection goals
+            intersection_goals = set(task_i).intersection(set(task_j))
+            non_intersection_goals = all_goals - intersection_goals
+            if len(non_intersection_goals) == 0:
+                continue
+
+            states = list(EQ_i.keys())
+
+            for goal in non_intersection_goals:
+                matches = [
+                    np.max(np.abs(EQ_i[state][str([goal, goal])] - EQ_j[state][str([goal, goal])])) < tol
+                    for state in states
+                ]
+                stats["mismatch_count" if not all(matches) else "match_count"] += 1
+    
+    # Print the counts after all states have been checked
+    if stats["mismatch_count"] > 0:
+        print(f"\n❌ {stats['mismatch_count']}/{stats['mismatch_count'] + stats['match_count']} goal slices mismatch.")
+    if stats["match_count"] > 0:
+        print(f"✅ {stats['match_count']}/{stats['mismatch_count'] + stats['match_count']} goal slices match.")
+
+
 def parse_filename(fname, print_params=False):
     """Parse filename to extract experiment parameters.
     
@@ -81,11 +117,29 @@ def parse_filename(fname, print_params=False):
         'maxiter': parts[5]
     }
 
-for num_rooms in [4, 9, 16]:
-    fname = f"exps_data_extension/exp1_{num_rooms}_3_50_0_2000.h5"
-    params = parse_filename(fname, print_params=True)
-    task_to_EQs = dd.io.load(fname)
-    equal_on_shared_goals(task_to_EQs=task_to_EQs)
+# ------------------------------------------------------------
+# Test 1 - Base tasks from original experiments of 4 rooms
+# ------------------------------------------------------------
+def test_1():
+    EQs_A = dd.io.load("exps_data/exp3_base_tasks_A_0.h5")
+    EQs_B = dd.io.load("exps_data/exp3_base_tasks_B_0.h5")
+
+    print("Test base tasks from original experiments of 4 rooms", end=" ")
+    equal_on_shared_goals(task_to_EQs={tuple(Bases_4[0]): EQs_A, tuple(Bases_4[1]): EQs_B})
+
+# test_1()
+
+# ------------------------------------------------------------
+# Test 2 - Equal on shared goals for randomly sampled tasks trained from scratch
+# ------------------------------------------------------------
+def test_2():
+    for num_rooms in [4, 9, 16]:
+        fname = f"exps_data_extension/exp1_{num_rooms}_3_50_0_2000.h5"
+        parse_filename(fname, print_params=True)
+        task_to_EQs = dd.io.load(fname)
+        equal_on_shared_goals(task_to_EQs=task_to_EQs)
+
+# test_2()
 
 # Results of execution:
 # Test base tasks from original experiments of 4 rooms ✅ 1/1 goal slices match.
@@ -96,3 +150,11 @@ for num_rooms in [4, 9, 16]:
 # ------------------------------------------------------------
 # Test 3 - Equal on non-shared goals for randomly sampled tasks trained from scratch
 # ------------------------------------------------------------
+def test_3():
+    for num_rooms in [4, 9, 16]:
+        fname = f"exps_data_extension/exp1_{num_rooms}_3_50_0_2000.h5"
+        parse_filename(fname, print_params=True)
+        task_to_EQs = dd.io.load(fname)
+        equal_on_non_shared_goals(task_to_EQs=task_to_EQs, all_goals=set(Goals_4))
+
+test_3()
