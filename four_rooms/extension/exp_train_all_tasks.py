@@ -17,6 +17,7 @@ from four_rooms.config import (
     Config_16,
 )
 
+np.object = object  # Hack to avoid error in save
 
 # ------------------------------------------------------------
 # Utils
@@ -34,7 +35,7 @@ def convert_defaultdict_to_dict(obj):
 # ------------------------------------------------------------
 # Main
 # ------------------------------------------------------------
-NUM_ROOMS = 4
+NUM_ROOMS = 16
 if NUM_ROOMS == 4:
     Config = Config_4
 elif NUM_ROOMS == 9:
@@ -63,25 +64,14 @@ Tasks = random_tasks
 # (Sparse rewards, Same terminal states)
 types = [(True, True), (True, False), (False, True), (False, False)]
 
-maxiter = 2000
+maxiter = 20000
 
 print("type: (Sparse rewards, Same terminal states)")
 t = 0
 
-pbar = tqdm(total=len(Tasks) + 2, desc="Training tasks")
-
-# Learning universal bounds (min and max tasks)
-env = GridWorld(MAP="MAP_" + str(NUM_ROOMS), goals=T_states, dense_rewards=not types[t][0])
-EQ_max, _ = Goal_Oriented_Q_learning(env, maxiter=maxiter)
-pbar.update(1)
-
-env = GridWorld(MAP="MAP_" + str(NUM_ROOMS), goals=T_states, goal_reward=-0.1, dense_rewards=not types[t][0])
-EQ_min, _ = Goal_Oriented_Q_learning(env, maxiter=maxiter)
-pbar.update(1)
-
 EQs_learned = []
 # Learning base tasks and doing composed tasks
-for task in Tasks:
+for task in tqdm(Tasks, desc="Training tasks"):
     goals = [[pos, pos] for pos in task]
     env = GridWorld(
         MAP="MAP_" + str(NUM_ROOMS),
@@ -93,16 +83,14 @@ for task in Tasks:
         env, maxiter=maxiter, T_states=None if types[t][1] else T_states
     )
     EQs_learned.append(Q)
-    pbar.update(1)
 
 # Convert all Q objects to regular dictionaries
 EQs_learned_converted = [convert_defaultdict_to_dict(eq) for eq in EQs_learned]
 
-np.object = object  # Hack to avoid error in save
 task_to_EQs = {tuple(task): eq for task, eq in zip(Tasks, EQs_learned_converted)}
 # Name convention:
 # exp1_<number_of_rooms>_<number_of_goals>_<number_of_tasks_learned>_<type_of_environment>_<maxiter>.h5
 save_name = (
-    f"exps_data_extension/exp1_{str(NUM_ROOMS)}_{str(num_goals)}_{str(num_tasks)}_{str(num_qs)}_{str(t)}_{str(maxiter)}.h5"
+    f"exps_data_extension/exp1_{str(NUM_ROOMS)}_{str(num_goals)}_{str(num_tasks)}_{str(t)}_{str(maxiter)}.h5"
 )
 dd.io.save(save_name, task_to_EQs)

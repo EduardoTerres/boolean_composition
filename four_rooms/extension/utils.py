@@ -1,11 +1,15 @@
 import deepdish as dd
+from numpy import save
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 from matplotlib import rc
 
-def plot(num_rooms):
+def plot(
+    num_rooms,
+    save_name = None,
+):
     tasks = [
         r"${M_{\emptyset}}$",
         r"${M_{\mathcal{U}}}$",
@@ -66,8 +70,8 @@ def plot(num_rooms):
         linewidth=3,
         showfliers=False,
     )
+    if save_name is None:
+        save_name = f"four_rooms/extension/figures/exp2_output_{num_rooms}.png"
+    fig.savefig(save_name, bbox_inches="tight")
+    print(f"Figure saved to {save_name}")
     plt.show()
-    fig.savefig("four_rooms/plots/dense.png", bbox_inches="tight")
-
-
-plot(num_rooms=4)

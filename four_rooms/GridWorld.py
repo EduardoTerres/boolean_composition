@@ -311,7 +311,7 @@ class GridWorld(gym.Env):
                         self._draw_action(ax, x, y, action)
 
         plt.pause(0.00001)  # 0.01
-        return None  # fig
+        return fig  # fig
 
     def _map_init(self):
         self.grid = []

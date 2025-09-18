@@ -80,7 +80,7 @@ def equal_on_non_shared_goals(
                 continue
 
             # Obtain intersection goals
-            intersection_goals = set(task_i).intersection(set(task_j))
+            intersection_goals = set(task_i).union(set(task_j))
             non_intersection_goals = all_goals - intersection_goals
             if len(non_intersection_goals) == 0:
                 continue
@@ -117,6 +117,11 @@ def parse_filename(fname, print_params=False):
         'maxiter': parts[5]
     }
 
+def pretty_print(func, number):
+    print("-" * 46 + "[Test " + str(number) + "]" + "-" * 46)
+    func()
+    print("-" * 100)
+
 # ------------------------------------------------------------
 # Test 1 - Base tasks from original experiments of 4 rooms
 # ------------------------------------------------------------
@@ -126,20 +131,27 @@ def test_1():
 
     print("Test base tasks from original experiments of 4 rooms", end=" ")
     equal_on_shared_goals(task_to_EQs={tuple(Bases_4[0]): EQs_A, tuple(Bases_4[1]): EQs_B})
+    equal_on_non_shared_goals(task_to_EQs={tuple(Bases_4[0]): EQs_A, tuple(Bases_4[1]): EQs_B}, all_goals=set(Goals_4))
 
-# test_1()
+pretty_print(test_1, 1)
 
 # ------------------------------------------------------------
 # Test 2 - Equal on shared goals for randomly sampled tasks trained from scratch
 # ------------------------------------------------------------
+filenames = {
+    4: "exps_data_extension/exp1_4_3_50_0_2000.h5",
+    9: "exps_data_extension/exp1_9_3_50_0_2000.h5",
+    16: "exps_data_extension/exp1_16_3_50_0_20000.h5",
+}
 def test_2():
     for num_rooms in [4, 9, 16]:
-        fname = f"exps_data_extension/exp1_{num_rooms}_3_50_0_2000.h5"
+        # fname = f"exps_data_extension/exp1_{num_rooms}_3_50_0_2000.h5"
+        fname = filenames[num_rooms]
         parse_filename(fname, print_params=True)
         task_to_EQs = dd.io.load(fname)
         equal_on_shared_goals(task_to_EQs=task_to_EQs)
 
-# test_2()
+pretty_print(test_2, 2)
 
 # Results of execution:
 # Test base tasks from original experiments of 4 rooms ✅ 1/1 goal slices match.
@@ -150,11 +162,16 @@ def test_2():
 # ------------------------------------------------------------
 # Test 3 - Equal on non-shared goals for randomly sampled tasks trained from scratch
 # ------------------------------------------------------------
+filenames = {
+    4: "exps_data_extension/exp1_4_3_50_0_2000.h5",
+    9: "exps_data_extension/exp1_9_3_50_0_2000.h5",
+    16: "exps_data_extension/exp1_16_3_50_0_20000.h5",
+}
 def test_3():
     for num_rooms in [4, 9, 16]:
-        fname = f"exps_data_extension/exp1_{num_rooms}_3_50_0_2000.h5"
+        fname = filenames[num_rooms]
         parse_filename(fname, print_params=True)
         task_to_EQs = dd.io.load(fname)
         equal_on_non_shared_goals(task_to_EQs=task_to_EQs, all_goals=set(Goals_4))
 
-test_3()
+pretty_print(test_3, 3)
