@@ -133,7 +133,7 @@ def test_1():
     equal_on_shared_goals(task_to_EQs={tuple(Bases_4[0]): EQs_A, tuple(Bases_4[1]): EQs_B})
     equal_on_non_shared_goals(task_to_EQs={tuple(Bases_4[0]): EQs_A, tuple(Bases_4[1]): EQs_B}, all_goals=set(Goals_4))
 
-pretty_print(test_1, 1)
+pretty_print(func=test_1, number=1)
 
 # ------------------------------------------------------------
 # Test 2 - Equal on shared goals for randomly sampled tasks trained from scratch
@@ -151,7 +151,7 @@ def test_2():
         task_to_EQs = dd.io.load(fname)
         equal_on_shared_goals(task_to_EQs=task_to_EQs)
 
-pretty_print(test_2, 2)
+pretty_print(func=test_2, number=2)
 
 # Results of execution:
 # Test base tasks from original experiments of 4 rooms ✅ 1/1 goal slices match.
@@ -174,4 +174,4 @@ def test_3():
         task_to_EQs = dd.io.load(fname)
         equal_on_non_shared_goals(task_to_EQs=task_to_EQs, all_goals=set(Goals_4))
 
-pretty_print(test_3, 3)
+pretty_print(func=test_3, number=3)

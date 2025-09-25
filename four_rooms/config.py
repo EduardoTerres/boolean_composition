@@ -7,6 +7,9 @@ def all_combinations(iterable):
     s = list(chain.from_iterable(combinations(s, r) for r in range(1, len(s)+1)))
     s = [list(task) for task in s]
     s.insert(0, [])
+
+    # Order by length and then lexicographically
+    s.sort(key=lambda x: (len(x), x))
     return s
 
 # ------------------------------------
@@ -38,6 +41,7 @@ Tasks_4 = [
     [(3, 3), (9, 9)],
     [(3, 9), (9, 3)],
 ]
+Tasks_4.sort(key=lambda x: (len(x), x))
 
 Config_4 = {
     "Goals": Goals_4,
@@ -48,9 +52,9 @@ Config_4 = {
 # 9 rooms configuration
 # ------------------------------------
 Goals_9 = [
-    (3, 3), (9, 3), (15, 3),
-    (3, 9), (9, 9), (15, 9),
-    (3, 15), (9, 15), (15, 15),
+    (3, 3),     (9, 3),     (15, 3),
+    (3, 9),                 (15, 9),
+    (3, 15),    (9, 15),    (15, 15),
 ]
 T_states_9 = [[pos, pos] for pos in Goals_9]
 
@@ -66,10 +70,10 @@ Config_9 = {
 # 16 rooms configuration
 # ------------------------------------
 Goals_16 = [
-    (3, 3), (9, 3), (15, 3), (21, 3),
-    (3, 9), (9, 9), (15, 9), (21, 9),
-    (3, 15), (9, 15), (15, 15), (21, 15),
-    (3, 21), (9, 21), (15, 21), (21, 21),
+    (3, 3),     (9, 3),     (15, 3),    (21, 3),
+    (3, 9),     (9, 9),     (15, 9),    (21, 9),
+    (3, 15),    (9, 15),    (15, 15),   (21, 15),
+    (3, 21),    (9, 21),    (15, 21),   (21, 21),
 ]
 T_states_16 = [[pos, pos] for pos in Goals_16]
 

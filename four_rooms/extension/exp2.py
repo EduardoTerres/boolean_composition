@@ -33,7 +33,7 @@ def get_random_partition(Goals):
 def evaluate(goals, EQ, T_states):
     env = GridWorld(MAP="MAP_" + str(NUM_ROOMS), goals=goals, T_states=T_states)
     # Render
-    render_EQ(EQ, env, f"exp2_composed_type_rooms_{NUM_ROOMS}.png")
+    # render_EQ(EQ, env, f"exp2_composed_type_rooms_{NUM_ROOMS}.png")
     policy = EQ_P(EQ)
     state = env.reset()
     done = False
@@ -132,7 +132,7 @@ def render_EQ(EQ, env, filename=None):
 # ------------------------------------------------------------
 random.seed(42)
 
-NUM_ROOMS = 9
+NUM_ROOMS = 4
 if NUM_ROOMS == 4:
     Config = Config_4
 elif NUM_ROOMS == 9:
@@ -144,16 +144,32 @@ else:
 
 T_states, Goals, Tasks = Config["T_states"], Config["Goals"], Config["Tasks"]
 
+def proportional_sample(tasks, total_samples):
+    """Sample the same number of tasks from each length."""
+    lenghts = defaultdict(list)
+    samples_per_length = total_samples // len(lenghts)
+    if total_samples % len(lenghts) != 0:
+        print(
+            f"Warning: Number of total samples {total_samples} is not"
+            f"divisible by the number of lengths {len(lenghts)}.",
+        )
+    for task in tasks:
+        lenghts[len(task)].append(task)
+    sampled_tasks = []
+    for length in lenghts:
+        sampled_tasks.extend(random.sample(lenghts[length], samples_per_length))
+    return sampled_tasks
+
+Tasks = proportional_sample(Tasks, 32)
+
 Partition = get_random_partition(Goals)
-# Bases = [[(3, 3), (3, 9)], [(3, 3), (9, 3)]]
-# Partition = Bases
 print(f"Partitioned goal state into {Partition[0]} and {Partition[1]}.")
 
 # (Sparse rewards, Same terminal states)
 types = [(True, True), (True, False), (False, True), (False, False)]
 
-maxiter = 500
-num_runs = 1
+maxiter = 5000
+num_runs = 1000
 
 EQs_all = {}
 Returns_all = {}
@@ -197,8 +213,8 @@ for t in range(len(types)):
 
     # EQ_off, EQ_on = order_EQs(EQs, Partition)
 
-    render_EQ(EQ_off, env, f"exp2_undesired_type_{t}_rooms_{NUM_ROOMS}.png")
-    render_EQ(EQ_on, env, f"exp2_desired_type_{t}_rooms_{NUM_ROOMS}.png")
+    # render_EQ(EQ_off, env, f"exp2_undesired_type_{t}_rooms_{NUM_ROOMS}.png")
+    # render_EQ(EQ_on, env, f"exp2_desired_type_{t}_rooms_{NUM_ROOMS}.png")
 
     EQs_composed = get_composed_tasks(Tasks, Goals, EQ_on, EQ_off)
 
@@ -222,4 +238,8 @@ EQs_all_converted = [convert_defaultdict_to_dict(eq) for eq in EQs_all]
 dd.io.save(f"exps_data_extension/exp2_all_EQs_{NUM_ROOMS}.h5", EQs_all_converted)
 dd.io.save(f"exps_data_extension/exp2_all_returns_{NUM_ROOMS}.h5", Returns_all)
 
-plot(num_rooms=NUM_ROOMS, save_name=f"four_rooms/extension/figures/exp2_output_{NUM_ROOMS}.png")
+plot(
+    num_rooms=NUM_ROOMS,
+    tasks=Tasks,
+    save_name=f"four_rooms/extension/figures/exp2_output_{NUM_ROOMS}.png",
+)

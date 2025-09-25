@@ -8,27 +8,10 @@ from matplotlib import rc
 
 def plot(
     num_rooms,
+    tasks,
     save_name = None,
 ):
-    tasks = [
-        r"${M_{\emptyset}}$",
-        r"${M_{\mathcal{U}}}$",
-        r"${M_{T}}\wedge{M_{L}}$",
-        r"${M_{T}}\wedge\neg{M_{L}}$",
-        r"${M_{L}}\wedge\neg{M_{T}}$",
-        r"${M_{T}}\bar{\vee}{M_{L}}$",
-        r"${M_{T}}$",
-        r"$\neg {M_{T}}$",
-        r"${M_{L}}$",
-        r"$\neg {M_{L}}$",
-        r"${M_{T}}\vee{M_{L}}$",
-        r"${M_{T}}\vee\neg{M_{L}}$",
-        r"${M_{L}}\vee\neg{M_{T}}$",
-        r"${M_{T}}\bar{\wedge}{M_{L}}$",
-        r"$\neg({M_{T}} \veebar {M_{L}})$",
-        r"${M_{T}} \veebar {M_{L}}$",
-    ]
-
+    tasks = ["\n".join(str(goal) for goal in task) for task in tasks]
     plt.ylim(-0.5, 2)
     rc_ = {
         "figure.figsize": (30, 10),
@@ -53,10 +36,10 @@ def plot(
     ]
 
     data = pd.DataFrame(
-        [[data[0][i, t] for t in range(n, 16)] + [types[0]] for i in range(len(data[0]))]
-        + [[data[1][i, t] for t in range(n, 16)] + [types[1]] for i in range(len(data[1]))]
-        + [[data[2][i, t] for t in range(n, 16)] + [types[2]] for i in range(len(data[2]))]
-        + [[data[3][i, t] for t in range(n, 16)] + [types[3]] for i in range(len(data[3]))],
+        [[data[0][i, t] for t in range(n, len(tasks))] + [types[0]] for i in range(len(data[0]))]
+        + [[data[1][i, t] for t in range(n, len(tasks))] + [types[1]] for i in range(len(data[1]))]
+        + [[data[2][i, t] for t in range(n, len(tasks))] + [types[2]] for i in range(len(data[2]))]
+        + [[data[3][i, t] for t in range(n, len(tasks))] + [types[3]] for i in range(len(data[3]))],
         columns=tasks[n:] + ["Domain"],
     )
     data = pd.melt(data, "Domain", var_name="Tasks", value_name="Average Returns")
@@ -74,4 +57,8 @@ def plot(
         save_name = f"four_rooms/extension/figures/exp2_output_{num_rooms}.png"
     fig.savefig(save_name, bbox_inches="tight")
     print(f"Figure saved to {save_name}")
-    plt.show()
+
+if __name__ == "__main__":
+    from four_rooms.config import Config_4
+    print(Config_4["Tasks"])
+    plot(num_rooms=4, tasks=Config_4["Tasks"])
