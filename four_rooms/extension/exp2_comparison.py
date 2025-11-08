@@ -160,11 +160,6 @@ else:
 
 T_states, Goals, Tasks = Config["T_states"], Config["Goals"], Config["Tasks"]
 
-Tasks = proportional_sample(Tasks, 32)
-
-Partition = get_random_partition(Goals)
-print(f"Partitioned goal state into {Partition[0]} and {Partition[1]}.")
-
 # (Sparse rewards, Same terminal states)
 # types = [(True, True), (True, False), (False, True), (False, False)]
 types = [(True, True)]
