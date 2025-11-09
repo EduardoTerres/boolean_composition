@@ -310,7 +310,6 @@ class GridWorld(gym.Env):
                     if probs[action]:
                         self._draw_action(ax, x, y, action)
 
-        plt.pause(0.00001)  # 0.01
         return fig  # fig
 
     def _map_init(self):
