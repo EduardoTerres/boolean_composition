@@ -126,7 +126,7 @@ def plot_returns_all_num_goals(
     ax.set_ylabel("Returns", fontsize=28)
     # Restore legend colors by explicitly passing the handles
     handles, _ = ax.get_legend_handles_labels()
-    ax.legend(handles=handles, labels=[r'Ours', r'Boolean'], fontsize=28)
+    ax.legend(handles=handles, labels=[r'Univ./Empty (Ours)', r'Base Tasks'], fontsize=28)
 
     # Change labels
     ax.set_xticklabels([tick.get_text().split('-')[0] for tick in ax.get_xticklabels()], fontsize=28)
@@ -159,7 +159,7 @@ def plot_time_taken_all_num_goals(time_taken: dict[int, dict[str, list[float]]],
     """ Plot time taken for all number of goals (log scale on y-axis)."""
     rc("text", usetex=True)
     num_rooms = sorted(time_taken.keys())
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(8, 6))
     positions = {r: i for i, r in enumerate(num_rooms)}
     
     colors = plt.cm.tab10.colors[:2]
@@ -176,12 +176,12 @@ def plot_time_taken_all_num_goals(time_taken: dict[int, dict[str, list[float]]],
         ax.plot([positions[r] for r in num_rooms], means, 'o-', label=method, linewidth=2, color=colors[idx])
 
     ax.set_xticks(range(len(num_rooms)))
-    ax.set_xticklabels(num_rooms, fontsize=16)
-    ax.set_xlabel("Number of rooms", fontsize=16)
-    ax.set_ylabel("Time (ms)", fontsize=16)
-    ax.set_yticklabels(ax.get_yticks(), fontsize=16)
+    ax.set_xticklabels(num_rooms, fontsize=20)
+    ax.set_xlabel("Number of goals", fontsize=20)
+    ax.set_ylabel("Time (ms)", fontsize=20)
+    ax.set_yticklabels(ax.get_yticks(), fontsize=20)
     ax.set_yscale('log')
     handles, _ = ax.get_legend_handles_labels()
-    ax.legend(handles=handles, labels=[r'Ours', r'Boolean'], fontsize=20)
+    ax.legend(handles=handles, labels=[r'Univ./Empty (Ours)', r'Base Tasks'], fontsize=20)
     plt.tight_layout()
     plt.savefig(save_name)
