@@ -139,7 +139,7 @@ def build_EQ_from_boolean_ops(task, composition_rules, EQ_basis, EQ_on, EQ_off):
         return EQ_on
 
     if len(task) == 1:
-        return build_single_goal_EQs(composition_rules, EQ_basis, EQ_on, EQ_off)
+        return build_single_goal_EQs(composition_rules[task[0]], EQ_basis, EQ_on, EQ_off)
 
     goal_EQ_1 = build_single_goal_EQs(composition_rules[task[0]], EQ_basis, EQ_on, EQ_off)
     goal_EQ_2 = build_single_goal_EQs(composition_rules[task[1]], EQ_basis, EQ_on, EQ_off)

@@ -8,6 +8,7 @@ from four_rooms.library import (
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from matplotlib import rc
 
 def plot_composed_EQs(composed_EQs, goals, terminal_states, num_rooms):
     """Plot composed EQs for all tasks individually."""
@@ -62,6 +63,7 @@ def plot_returns_all_num_goals(
         returns: Dictionary mapping num_rooms to tasks to their returns
         save_name: Path to save the figure
     """
+    rc("text", usetex=True)
     # Number of tasks to show for each number of goals
     # The keys of the outer dictionary are the number of rooms
     # The keys of the inner dictionary are the number of goals
@@ -117,16 +119,16 @@ def plot_returns_all_num_goals(
     # Add text labels below each room block
     pos = 0
     for r, n in zip([4, 8, 16], tasks_per_room):
-        ax.text(pos + (n - 1) / 2, -0.14, f"{r} rooms", ha='center', transform=ax.get_xaxis_transform(), fontsize=20)
+        ax.text(pos + (n - 1) / 2, -0.14, f"{r} rooms", ha='center', transform=ax.get_xaxis_transform(), fontsize=28)
         pos += n
     
-    ax.set_xlabel("Number of goals in task", fontsize=20)
-    ax.set_ylabel("Returns", fontsize=20)
-    ax.legend(fontsize=20)
+    ax.set_xlabel("Number of goals in task", fontsize=26)
+    ax.set_ylabel("Returns", fontsize=26)
+    ax.legend(fontsize=26)
 
     # Change labels
-    ax.set_xticklabels([tick.get_text().split('-')[0] for tick in ax.get_xticklabels()], fontsize=20)
-    plt.yticks(fontsize=20)
+    ax.set_xticklabels([tick.get_text().split('-')[0] for tick in ax.get_xticklabels()], fontsize=26)
+    plt.yticks(fontsize=26)
     plt.tight_layout()
     plt.savefig(save_name)
 
@@ -153,7 +155,6 @@ def plot_time_taken(time_taken: dict[str, list[float]], num_rooms: int, save_nam
 
 def plot_time_taken_all_num_goals(time_taken: dict[int, dict[str, list[float]]], save_name: str = None):
     """ Plot time taken for all number of goals (log scale on y-axis)."""
-    from matplotlib import rc
     rc("text", usetex=True)
     num_rooms = sorted(time_taken.keys())
     fig, ax = plt.subplots(figsize=(10, 6))

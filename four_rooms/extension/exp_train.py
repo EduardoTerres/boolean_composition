@@ -34,7 +34,7 @@ np.object = object  # Hack to avoid error in save
 
 random.seed(42)
 
-NUM_ROOMS = 16
+NUM_ROOMS = 8
 configs = {
     4: Config_4,
     8: Config_8,
@@ -48,7 +48,7 @@ tasks = config["Tasks"]
 base_tasks = config["Bases"]
 composition_rules = config["Composition_rules"]
 
-tasks = proportional_sample(tasks, 2)
+tasks = proportional_sample(tasks, 1)
 
 # partition = get_random_partition(goals)
 # print(f"Partitioned goal state into {partition[0]} and {partition[1]}.")
@@ -57,8 +57,8 @@ tasks = proportional_sample(tasks, 2)
 # types = [(True, True), (True, False), (False, True), (False, False)]
 types = [(True, True)]
 
-maxiter = 200
-num_runs = 10
+maxiter = 5_000
+num_runs = 10_000
 
 Returns_all = {}
 
