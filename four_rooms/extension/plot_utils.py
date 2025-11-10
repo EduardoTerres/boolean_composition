@@ -1,3 +1,5 @@
+import random
+from collections import defaultdict
 from four_rooms.GridWorld import GridWorld
 from four_rooms.library import (
     EQ_P,
@@ -50,6 +52,78 @@ def plot_returns(returns: dict[tuple[int, int], dict[str, list[float]]], num_roo
     plt.savefig(save_name)
 
 
+def plot_returns_all_num_goals(
+    returns: dict[int, dict[tuple[int, int], dict[str, list[float]]]],
+    save_name: str = None,
+):
+    """ Plot returns for all tasks, comparing onoff and boolean methods side by side.
+    
+    Args:
+        returns: Dictionary mapping num_rooms to tasks to their returns
+        save_name: Path to save the figure
+    """
+    # Number of tasks to show for each number of goals
+    # The keys of the outer dictionary are the number of rooms
+    # The keys of the inner dictionary are the number of goals
+    # The values are the number of tasks to show for each number of goals
+    shown_tasks = {
+        4: {1:1, 2:1, 3:1},
+        8: {1:1, 3:1, 5:1, 7:1},
+        16: {1:1, 5:1, 9:1, 13:1},
+    }
+
+    flattened_returns = {}
+    # Proportional sample of the tasks for each number of rooms
+    for num_rooms, task_returns_dict in returns.items():
+        tasks_by_length = defaultdict(list)
+        for task in task_returns_dict.keys():
+            tasks_by_length[len(task)].append(task)
+        
+        sampled_tasks = []
+        for length in shown_tasks[num_rooms]:
+            sampled_tasks.extend(random.sample(tasks_by_length[length], shown_tasks[num_rooms][length]))
+
+        flattened_returns.update({task: task_returns_dict[task] for task in sampled_tasks})
+
+    print(
+        "Sampled tasks:",
+        ", ".join(
+            f"{len(returns[num_rooms].keys())} tasks for {num_rooms} rooms"
+            for num_rooms in [4, 8, 16]
+        ),
+    )
+    
+    tasks = ["\n".join(str(g) for g in task) for task in flattened_returns.keys()]
+    data = pd.DataFrame([{"Task": task, "Method": method, "Returns": val}
+                         for task, vals in zip(tasks, flattened_returns.values())
+                         for method, returns_list in vals.items()
+                         for val in returns_list])
+    plt.figure(figsize=(24, 12))  # Make the figure bigger
+    sns.set_context("notebook", font_scale=0.8)  # Make the words smaller
+    ax = sns.boxplot(x="Task", y="Returns", hue="Method", data=data)
+    
+    # Add vertical lines to separate rooms
+    tasks_per_room = [sum(shown_tasks[r].values()) for r in [4, 8, 16]]
+    pos = 0
+    for n in tasks_per_room[:-1]:
+        pos += n
+        ax.axvline(pos - 0.5, color='gray', linestyle='--', linewidth=4)
+    
+    # Add text labels below each room block
+    pos = 0
+    for r, n in zip([4, 8, 16], tasks_per_room):
+        ax.text(pos + (n - 1) / 2, -0.55, f"{r} rooms", ha='center', transform=ax.get_xaxis_transform(), fontsize=26)
+        pos += n
+    
+    ax.set_xlabel("Task", fontsize=20)
+    ax.set_ylabel("Returns", fontsize=20)
+    ax.legend(fontsize=20)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.tight_layout()
+    plt.savefig(save_name)
+
+
 def plot_time_taken(time_taken: dict[str, list[float]], num_rooms: int, save_name: str = None):
     """ Plot returns for all tasks, comparing onoff and boolean methods side by side."""
     tasks = ["\n".join(str(g) for g in task) for task in time_taken.keys()]
@@ -70,8 +144,8 @@ def plot_time_taken(time_taken: dict[str, list[float]], num_rooms: int, save_nam
     plt.savefig(save_name)
 
 
-def plot_time_taken_all_num_rooms(time_taken: dict[int, dict[str, list[float]]], save_name: str = None):
-    """ Plot time taken for all number of rooms (log scale on y-axis)."""
+def plot_time_taken_all_num_goals(time_taken: dict[int, dict[str, list[float]]], save_name: str = None):
+    """ Plot time taken for all number of goals (log scale on y-axis)."""
     from matplotlib import rc
     rc("text", usetex=True)
     num_rooms = sorted(time_taken.keys())

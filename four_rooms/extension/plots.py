@@ -1,12 +1,19 @@
-import deepdish as dd
-from numpy import save
+import random
+
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 from matplotlib import rc
 
-from four_rooms.extension.plot_utils import plot_time_taken_all_num_rooms
+import deepdish as dd
+from numpy import save
+
+from four_rooms.extension.plot_utils import (
+    plot_returns_all_num_goals,
+    plot_time_taken_all_num_goals,
+)
+
+random.seed(421)
 
 def plot(
     num_rooms,
@@ -70,7 +77,14 @@ def plot_time_taken_all():
     time_taken_8 = dd.io.load("exps_data_extension/composed_time_taken_8.h5")
     time_taken_16 = dd.io.load("exps_data_extension/composed_time_taken_16.h5")
     time_taken = {4: time_taken_4, 8: time_taken_8, 16: time_taken_16}
-    plot_time_taken_all_num_rooms(time_taken, save_name="four_rooms/extension/figures/time_taken_all_num_rooms.png")
+    plot_time_taken_all_num_goals(time_taken, save_name="four_rooms/extension/figures/time_taken_all_num_goals.png")
+
+def plot_returns_all():
+    returns_4 = dd.io.load("exps_data_extension/composed_returns_4.h5")
+    returns_8 = dd.io.load("exps_data_extension/composed_returns_8.h5")
+    returns_16 = dd.io.load("exps_data_extension/composed_returns_16.h5")
+    returns = {4: returns_4, 8: returns_8, 16: returns_16}
+    plot_returns_all_num_goals(returns, save_name="four_rooms/extension/figures/returns_all_num_goals.png")
 
 if __name__ == "__main__":
-    plot_time_taken_all()
+    plot_returns_all()
