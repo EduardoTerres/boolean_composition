@@ -48,7 +48,6 @@ def plot_returns(returns: dict[tuple[int, int], dict[str, list[float]]], num_roo
     plt.yticks(fontsize=20)
     plt.tight_layout()
     plt.savefig(save_name)
-    plt.show()
 
 
 def plot_time_taken(time_taken: dict[str, list[float]], num_rooms: int, save_name: str = None):
@@ -58,15 +57,44 @@ def plot_time_taken(time_taken: dict[str, list[float]], num_rooms: int, save_nam
                          for task, vals in zip(tasks, time_taken.values())
                          for method, returns_list in vals.items()
                          for val in returns_list])
-    plt.figure(figsize=(6, 6))  # Make the figure bigger
+    plt.figure(figsize=(12, 12))  # Make the figure bigger
     sns.set_context("notebook", font_scale=0.8)  # Make the words smaller
     ax = sns.boxplot(x="Task", y="Returns", hue="Method", data=data)
-    ax.set_xlabel("Task", fontsize=20)
-    ax.set_ylabel("Returns", fontsize=20)
+    # Do not plot the x ticks labels
+    ax.set_ylabel("Time taken for composition", fontsize=20)
+    ax.set_xlabel("All tasks", fontsize=20)
     ax.legend(fontsize=20)
-    plt.xticks(fontsize=20)
+    ax.set_xticklabels([])  # Remove x tick labels
     plt.yticks(fontsize=20)
     plt.tight_layout()
     plt.savefig(save_name)
-    plt.show()
 
+
+def plot_time_taken_all_num_rooms(time_taken: dict[int, dict[str, list[float]]], save_name: str = None):
+    """ Plot time taken for all number of rooms (log scale on y-axis)."""
+    num_rooms = sorted(time_taken.keys())
+    fig, ax = plt.subplots(figsize=(10, 6))
+    positions = {r: i for i, r in enumerate(num_rooms)}
+    
+    colors = plt.cm.tab10.colors[:2]
+    for idx, method in enumerate(["onoff", "boolean"]):
+        data = [time_taken[r][method] for r in num_rooms]
+        bp = ax.boxplot(data, positions=[positions[r] for r in num_rooms], widths=0.3, patch_artist=True)
+        for patch in bp['boxes']:
+            patch.set_facecolor(colors[idx])
+            patch.set_alpha(0.7)
+        # Set the color of the median lines
+        for median in bp['medians']:
+            median.set_color(colors[idx])
+        means = [sum(vals) / len(vals) for vals in data]
+        ax.plot([positions[r] for r in num_rooms], means, 'o-', label=method, linewidth=2, color=colors[idx])
+
+    ax.set_xticks(range(len(num_rooms)))
+    ax.set_xticklabels(num_rooms)
+    ax.set_xlabel("Number of rooms", fontsize=16)
+    ax.set_ylabel("Time taken", fontsize=16)
+    ax.set_yscale('log')
+    ax.legend(fontsize=14)
+    plt.tight_layout()
+    if save_name:
+        plt.savefig(save_name)

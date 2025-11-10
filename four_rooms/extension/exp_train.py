@@ -34,7 +34,7 @@ np.object = object  # Hack to avoid error in save
 
 random.seed(42)
 
-NUM_ROOMS = 4
+NUM_ROOMS = 16
 configs = {
     4: Config_4,
     9: Config_9,
@@ -48,7 +48,7 @@ tasks = config["Tasks"]
 base_tasks = config["Bases"]
 composition_rules = config["Composition_rules"]
 
-# tasks = proportional_sample(tasks, 32)
+tasks = proportional_sample(tasks, 2)
 
 # partition = get_random_partition(goals)
 # print(f"Partitioned goal state into {partition[0]} and {partition[1]}.")
@@ -57,8 +57,8 @@ composition_rules = config["Composition_rules"]
 # types = [(True, True), (True, False), (False, True), (False, False)]
 types = [(True, True)]
 
-maxiter = 50
-num_runs = 1000
+maxiter = 200
+num_runs = 10
 
 Returns_all = {}
 
@@ -122,7 +122,7 @@ EQs_composed, time_taken = get_composed_tasks(
     composition_rules=composition_rules,
 )
 
-plot_composed_EQs(EQs_composed, goals, terminal_states, NUM_ROOMS)
+# plot_composed_EQs(EQs_composed, goals, terminal_states, NUM_ROOMS)
 
 returns = {}
 for task, EQs in tqdm(EQs_composed.items(), desc="Evaluating tasks"):
@@ -139,8 +139,30 @@ for task, EQs in tqdm(EQs_composed.items(), desc="Evaluating tasks"):
             evaluate(task_goals, EQs["boolean"], terminal_states, NUM_ROOMS)
         )
 
-plot_returns(returns, NUM_ROOMS, save_name="four_rooms/extension/figures/returns_comparison_{num_rooms}.png")
-plot_time_taken({"4 rooms": time_taken}, NUM_ROOMS, save_name="four_rooms/extension/figures/time_taken_comparison_{num_rooms}.png")
+# Convert all EQs to regular dictionaries
+learned_universal_EQ = convert_defaultdict_to_dict(learned_universal_EQ)
+learned_empty_EQ = convert_defaultdict_to_dict(learned_empty_EQ)
+learned_base_tasks_EQs = [convert_defaultdict_to_dict(eq) for eq in learned_base_tasks_EQs]
+returns = {task: {method: returns_list for method, returns_list in returns[task].items()} for task in returns}
+time_taken = {method: time_taken_list for method, time_taken_list in time_taken.items()}
+
+# Save EQ_on, EQ_off, EQ_basis, returns and time_taken
+dd.io.save(f"exps_data_extension/learned_EQ_on_{NUM_ROOMS}.h5", learned_universal_EQ)
+dd.io.save(f"exps_data_extension/learned_EQ_off_{NUM_ROOMS}.h5", learned_empty_EQ)
+dd.io.save(f"exps_data_extension/learned_EQ_basis_{NUM_ROOMS}.h5", learned_base_tasks_EQs)
+dd.io.save(f"exps_data_extension/composed_returns_{NUM_ROOMS}.h5", returns)
+dd.io.save(f"exps_data_extension/composed_time_taken_{NUM_ROOMS}.h5", time_taken)
+
+plot_returns(
+    returns=returns,
+    num_rooms=NUM_ROOMS,
+    save_name=f"four_rooms/extension/figures/returns_comparison_{NUM_ROOMS}.png",
+)
+plot_time_taken(
+    time_taken={f"{NUM_ROOMS} rooms": time_taken},
+    num_rooms=NUM_ROOMS,
+    save_name=f"four_rooms/extension/figures/time_taken_comparison_{NUM_ROOMS}.png",
+)
 
 # EQs_all_converted = [convert_defaultdict_to_dict(eq) for eq in EQs_all]
 

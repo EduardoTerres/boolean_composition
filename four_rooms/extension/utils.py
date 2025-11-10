@@ -201,18 +201,30 @@ def render_EQ(EQ, env, filename=None):
     plt.close(fig)
     print(f"Figure saved to {filename}.", end="\n")
 
-def proportional_sample(tasks, total_samples):
-    """Sample the same number of tasks from each length."""
-    lenghts = defaultdict(list)
-    samples_per_length = total_samples // len(lenghts)
-    if total_samples % len(lenghts) != 0:
-        print(
-            f"Warning: Number of total samples {total_samples} is not"
-            f"divisible by the number of lengths {len(lenghts)}.",
-        )
+
+def proportional_sample(tasks: list[list[tuple[int, int]]], total_samples: int):
+    """Sample tasks in a stratified way by length of task (number of goals).
+    If for a given length, there are less tasks than total_samples, then all
+    tasks of that length are sampled, which will be less than total_samples.
+    
+    Args:
+        tasks: list of tasks
+
+    Returns:
+        sampled_tasks: list of sampled tasks
+    """
+    # Separate tasks by length
+    tasks_by_length = defaultdict(list)
     for task in tasks:
-        lenghts[len(task)].append(task)
+        tasks_by_length[len(task)].append(task)
+
     sampled_tasks = []
-    for length in lenghts:
-        sampled_tasks.extend(random.sample(lenghts[length], samples_per_length))
+    for length in tasks_by_length.keys():
+        sampled_tasks.extend(
+            random.sample(
+                tasks_by_length[length],
+                min(total_samples, len(tasks_by_length[length])),
+            )
+        )
+
     return sampled_tasks
