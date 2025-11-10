@@ -13,7 +13,7 @@ from four_rooms.extension.plot_utils import (
     plot_time_taken_all_num_goals,
 )
 
-random.seed(421)
+random.seed(42)
 
 def plot(
     num_rooms,

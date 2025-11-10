@@ -155,7 +155,6 @@ dd.io.save(f"exps_data_extension/composed_time_taken_{NUM_ROOMS}.h5", time_taken
 
 plot_returns(
     returns=returns,
-    num_rooms=NUM_ROOMS,
     save_name=f"four_rooms/extension/figures/returns_comparison_{NUM_ROOMS}.png",
 )
 plot_time_taken(
@@ -163,8 +162,3 @@ plot_time_taken(
     num_rooms=NUM_ROOMS,
     save_name=f"four_rooms/extension/figures/time_taken_comparison_{NUM_ROOMS}.png",
 )
-
-# EQs_all_converted = [convert_defaultdict_to_dict(eq) for eq in EQs_all]
-
-# dd.io.save(f"exps_data_extension/exp2_all_EQs_{NUM_ROOMS}.h5", EQs_all_converted)
-# dd.io.save(f"exps_data_extension/exp2_all_returns_{NUM_ROOMS}.h5", Returns_all)

@@ -33,15 +33,15 @@ def plot_composed_EQs(composed_EQs, goals, terminal_states, num_rooms):
         plt.close(boolean_fig)
 
 
-def plot_returns(returns: dict[tuple[int, int], dict[str, list[float]]], num_rooms: int, save_name: str = None):
+def plot_returns(returns: dict[tuple[int, int], dict[str, list[float]]], save_name: str = None):
     """ Plot returns for all tasks, comparing onoff and boolean methods side by side."""
     tasks = ["\n".join(str(g) for g in task) for task in returns.keys()]
     data = pd.DataFrame([{"Task": task, "Method": method, "Returns": val}
                          for task, vals in zip(tasks, returns.values())
                          for method, returns_list in vals.items()
                          for val in returns_list])
-    plt.figure(figsize=(16, 6))  # Make the figure bigger
-    sns.set_context("notebook", font_scale=0.8)  # Make the words smaller
+    plt.figure(figsize=(16, 6))
+    sns.set_context("notebook", font_scale=0.8)
     ax = sns.boxplot(x="Task", y="Returns", hue="Method", data=data)
     ax.set_xlabel("Task", fontsize=20)
     ax.set_ylabel("Returns", fontsize=20)
@@ -67,9 +67,9 @@ def plot_returns_all_num_goals(
     # The keys of the inner dictionary are the number of goals
     # The values are the number of tasks to show for each number of goals
     shown_tasks = {
-        4: {1:1, 2:1, 3:1},
-        8: {1:1, 3:1, 5:1, 7:1},
-        16: {1:1, 5:1, 9:1, 13:1},
+        4: [1, 2, 3],
+        8: [1, 3, 5, 7],
+        16: [1, 5, 9, 13],
     }
 
     flattened_returns = {}
@@ -79,11 +79,16 @@ def plot_returns_all_num_goals(
         for task in task_returns_dict.keys():
             tasks_by_length[len(task)].append(task)
         
-        sampled_tasks = []
         for length in shown_tasks[num_rooms]:
-            sampled_tasks.extend(random.sample(tasks_by_length[length], shown_tasks[num_rooms][length]))
+            tasks_of_length_returns = {
+                "onoff": [],
+                "boolean": [],
+            }
+            for task in tasks_by_length[length]:
+                tasks_of_length_returns["onoff"].extend(returns[num_rooms][task]["onoff"])
+                tasks_of_length_returns["boolean"].extend(returns[num_rooms][task]["boolean"])
 
-        flattened_returns.update({task: task_returns_dict[task] for task in sampled_tasks})
+            flattened_returns[(num_rooms, length)] = tasks_of_length_returns
 
     print(
         "Sampled tasks:",
@@ -93,32 +98,34 @@ def plot_returns_all_num_goals(
         ),
     )
     
-    tasks = ["\n".join(str(g) for g in task) for task in flattened_returns.keys()]
+    tasks = [f"{task[1]}-{task[0]}" for task in flattened_returns.keys()]
     data = pd.DataFrame([{"Task": task, "Method": method, "Returns": val}
                          for task, vals in zip(tasks, flattened_returns.values())
                          for method, returns_list in vals.items()
                          for val in returns_list])
-    plt.figure(figsize=(24, 12))  # Make the figure bigger
-    sns.set_context("notebook", font_scale=0.8)  # Make the words smaller
+    plt.figure(figsize=(20, 10))
+    sns.set_context("notebook", font_scale=0.8)
     ax = sns.boxplot(x="Task", y="Returns", hue="Method", data=data)
     
     # Add vertical lines to separate rooms
-    tasks_per_room = [sum(shown_tasks[r].values()) for r in [4, 8, 16]]
+    tasks_per_room = [len(shown_tasks[r]) for r in [4, 8, 16]]
     pos = 0
     for n in tasks_per_room[:-1]:
         pos += n
-        ax.axvline(pos - 0.5, color='gray', linestyle='--', linewidth=4)
+        ax.axvline(pos - 0.5, color='black', linestyle='-', linewidth=1)
     
     # Add text labels below each room block
     pos = 0
     for r, n in zip([4, 8, 16], tasks_per_room):
-        ax.text(pos + (n - 1) / 2, -0.55, f"{r} rooms", ha='center', transform=ax.get_xaxis_transform(), fontsize=26)
+        ax.text(pos + (n - 1) / 2, -0.14, f"{r} rooms", ha='center', transform=ax.get_xaxis_transform(), fontsize=20)
         pos += n
     
-    ax.set_xlabel("Task", fontsize=20)
+    ax.set_xlabel("Number of goals in task", fontsize=20)
     ax.set_ylabel("Returns", fontsize=20)
     ax.legend(fontsize=20)
-    plt.xticks(fontsize=20)
+
+    # Change labels
+    ax.set_xticklabels([tick.get_text().split('-')[0] for tick in ax.get_xticklabels()], fontsize=20)
     plt.yticks(fontsize=20)
     plt.tight_layout()
     plt.savefig(save_name)
