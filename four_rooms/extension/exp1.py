@@ -140,7 +140,7 @@ pretty_print(func=test_1, number=1)
 # ------------------------------------------------------------
 filenames = {
     4: "exps_data_extension/exp1_4_3_50_0_2000.h5",
-    9: "exps_data_extension/exp1_9_3_50_0_2000.h5",
+    8: "exps_data_extension/exp1_8_3_50_0_2000.h5",
     16: "exps_data_extension/exp1_16_3_50_0_20000.h5",
 }
 def test_2():
@@ -164,7 +164,7 @@ pretty_print(func=test_2, number=2)
 # ------------------------------------------------------------
 filenames = {
     4: "exps_data_extension/exp1_4_3_50_0_2000.h5",
-    9: "exps_data_extension/exp1_9_3_50_0_2000.h5",
+    8: "exps_data_extension/exp1_8_3_50_0_2000.h5",
     16: "exps_data_extension/exp1_16_3_50_0_20000.h5",
 }
 def test_3():

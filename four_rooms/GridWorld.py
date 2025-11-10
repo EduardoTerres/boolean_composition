@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as colors
 from collections import defaultdict
-from four_rooms.config import MAP_4, MAP_9, MAP_16
+from four_rooms.config import MAP_4, MAP_8, MAP_16
 
 # Defining actions
 UP = 0
@@ -32,7 +32,7 @@ class GridWorld(gym.Env):
     metadata = {"render.modes": ["human"]}
     MAP_INDEX = {
         "MAP_4": MAP_4,
-        "MAP_9": MAP_9,
+        "MAP_8": MAP_8,
         "MAP_16": MAP_16,
     }
 

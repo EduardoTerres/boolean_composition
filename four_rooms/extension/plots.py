@@ -67,9 +67,9 @@ def plot(
 
 def plot_time_taken_all():
     time_taken_4 = dd.io.load("exps_data_extension/composed_time_taken_4.h5")
-    time_taken_9 = dd.io.load("exps_data_extension/composed_time_taken_9.h5")
+    time_taken_8 = dd.io.load("exps_data_extension/composed_time_taken_8.h5")
     time_taken_16 = dd.io.load("exps_data_extension/composed_time_taken_16.h5")
-    time_taken = {4: time_taken_4, 9: time_taken_9, 16: time_taken_16}
+    time_taken = {4: time_taken_4, 8: time_taken_8, 16: time_taken_16}
     plot_time_taken_all_num_rooms(time_taken, save_name="four_rooms/extension/figures/time_taken_all_num_rooms.png")
 
 if __name__ == "__main__":

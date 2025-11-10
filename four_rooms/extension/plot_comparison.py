@@ -4,7 +4,7 @@ import seaborn as sns
 from matplotlib import rc
 import pandas as pd
 
-from four_rooms.config import Config_4, Config_9, Config_16
+from four_rooms.config import Config_4, Config_8, Config_16
 
 def plot_comparison(
     data_original_composition,
@@ -58,8 +58,8 @@ if __name__ == "__main__":
     NUM_ROOMS = 4
     if NUM_ROOMS == 4:
         Config = Config_4
-    elif NUM_ROOMS == 9:
-        Config = Config_9
+    elif NUM_ROOMS == 8:
+        Config = Config_8
     elif NUM_ROOMS == 16:
         Config = Config_16
     else:

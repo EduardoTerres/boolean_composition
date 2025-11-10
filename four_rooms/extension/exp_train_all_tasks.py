@@ -13,7 +13,7 @@ from tqdm import tqdm
 from four_rooms.library import Goal_Oriented_Q_learning
 from four_rooms.config import (
     Config_4,
-    Config_9,
+    Config_8,
     Config_16,
 )
 
@@ -38,8 +38,8 @@ def convert_defaultdict_to_dict(obj):
 NUM_ROOMS = 16
 if NUM_ROOMS == 4:
     Config = Config_4
-elif NUM_ROOMS == 9:
-    Config = Config_9
+elif NUM_ROOMS == 8:
+    Config = Config_8
 elif NUM_ROOMS == 16:
     Config = Config_16
 else:

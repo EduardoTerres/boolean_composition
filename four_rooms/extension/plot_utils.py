@@ -72,13 +72,15 @@ def plot_time_taken(time_taken: dict[str, list[float]], num_rooms: int, save_nam
 
 def plot_time_taken_all_num_rooms(time_taken: dict[int, dict[str, list[float]]], save_name: str = None):
     """ Plot time taken for all number of rooms (log scale on y-axis)."""
+    from matplotlib import rc
+    rc("text", usetex=True)
     num_rooms = sorted(time_taken.keys())
     fig, ax = plt.subplots(figsize=(10, 6))
     positions = {r: i for i, r in enumerate(num_rooms)}
     
     colors = plt.cm.tab10.colors[:2]
     for idx, method in enumerate(["onoff", "boolean"]):
-        data = [time_taken[r][method] for r in num_rooms]
+        data = [[1000 * t for t in time_taken[r][method]] for r in num_rooms]
         bp = ax.boxplot(data, positions=[positions[r] for r in num_rooms], widths=0.3, patch_artist=True)
         for patch in bp['boxes']:
             patch.set_facecolor(colors[idx])
@@ -90,9 +92,10 @@ def plot_time_taken_all_num_rooms(time_taken: dict[int, dict[str, list[float]]],
         ax.plot([positions[r] for r in num_rooms], means, 'o-', label=method, linewidth=2, color=colors[idx])
 
     ax.set_xticks(range(len(num_rooms)))
-    ax.set_xticklabels(num_rooms)
+    ax.set_xticklabels(num_rooms, fontsize=16)
     ax.set_xlabel("Number of rooms", fontsize=16)
-    ax.set_ylabel("Time taken", fontsize=16)
+    ax.set_ylabel("Time (ms)", fontsize=16)
+    ax.set_yticklabels(ax.get_yticks(), fontsize=16)
     ax.set_yscale('log')
     ax.legend(fontsize=14)
     plt.tight_layout()

@@ -77,25 +77,25 @@ Config_4 = {
 }
 
 # ------------------------------------
-# 9 rooms configuration
+# 8 rooms configuration
 # ------------------------------------
-Goals_9 = [
+Goals_8 = [
     (3, 3),     (9, 3),     (15, 3),
     (3, 9),                 (15, 9),
     (3, 15),    (9, 15),    (15, 15),
 ]
-T_states_9 = [[pos, pos] for pos in Goals_9]
+T_states_8 = [[pos, pos] for pos in Goals_8]
 
-Tasks_9 = all_combinations(Goals_9)
+Tasks_8 = all_combinations(Goals_8)
 
-Bases_9, Composition_rules_9 = get_base_tasks(Goals_9)
+Bases_8, Composition_rules_8 = get_base_tasks(Goals_8)
 
-Config_9 = {
-    "Goals": Goals_9,
-    "T_states": T_states_9,
-    "Tasks": Tasks_9,
-    "Bases": Bases_9,
-    "Composition_rules": Composition_rules_9,
+Config_8 = {
+    "Goals": Goals_8,
+    "T_states": T_states_8,
+    "Tasks": Tasks_8,
+    "Bases": Bases_8,
+    "Composition_rules": Composition_rules_8,
 }
 
 # ------------------------------------
@@ -140,7 +140,7 @@ MAP_4 = (
     "1 1 1 1 1 1 1 1 1 1 1 1 1"
 )
 
-MAP_9 = (
+MAP_8 = (
     "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1\n"
     "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1\n"
     "1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1\n"

@@ -11,7 +11,7 @@ from four_rooms.library import (
 )
 from four_rooms.config import (
     Config_4,
-    Config_9,
+    Config_8,
     Config_16,
 )
 import matplotlib.pyplot as plt
@@ -37,7 +37,7 @@ random.seed(42)
 NUM_ROOMS = 16
 configs = {
     4: Config_4,
-    9: Config_9,
+    8: Config_8,
     16: Config_16,
 }
 config = configs[NUM_ROOMS]
