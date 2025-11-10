@@ -34,7 +34,7 @@ np.object = object  # Hack to avoid error in save
 
 random.seed(42)
 
-NUM_ROOMS = 8
+NUM_ROOMS = 4
 configs = {
     4: Config_4,
     8: Config_8,

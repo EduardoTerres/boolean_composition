@@ -71,7 +71,7 @@ def plot_returns_all_num_goals(
     shown_tasks = {
         4: [1, 2, 3],
         8: [1, 3, 5, 7],
-        16: [1, 5, 9, 13],
+        16: [1, 5, 9, 13, 15],
     }
 
     flattened_returns = {}
@@ -119,21 +119,23 @@ def plot_returns_all_num_goals(
     # Add text labels below each room block
     pos = 0
     for r, n in zip([4, 8, 16], tasks_per_room):
-        ax.text(pos + (n - 1) / 2, -0.14, f"{r} rooms", ha='center', transform=ax.get_xaxis_transform(), fontsize=28)
+        ax.text(pos + (n - 1) / 2, 1.04, f"{r} rooms", ha='center', transform=ax.get_xaxis_transform(), fontsize=28)
         pos += n
     
-    ax.set_xlabel("Number of goals in task", fontsize=26)
-    ax.set_ylabel("Returns", fontsize=26)
-    ax.legend(fontsize=26)
+    ax.set_xlabel("Number of goals in task", fontsize=28)
+    ax.set_ylabel("Returns", fontsize=28)
+    # Restore legend colors by explicitly passing the handles
+    handles, _ = ax.get_legend_handles_labels()
+    ax.legend(handles=handles, labels=[r'Ours', r'Boolean'], fontsize=28)
 
     # Change labels
-    ax.set_xticklabels([tick.get_text().split('-')[0] for tick in ax.get_xticklabels()], fontsize=26)
-    plt.yticks(fontsize=26)
+    ax.set_xticklabels([tick.get_text().split('-')[0] for tick in ax.get_xticklabels()], fontsize=28)
+    plt.yticks(fontsize=28)
     plt.tight_layout()
     plt.savefig(save_name)
 
 
-def plot_time_taken(time_taken: dict[str, list[float]], num_rooms: int, save_name: str = None):
+def plot_time_taken(time_taken: dict[str, list[float]], num_rooms: int, save_name: str):
     """ Plot returns for all tasks, comparing onoff and boolean methods side by side."""
     tasks = ["\n".join(str(g) for g in task) for task in time_taken.keys()]
     data = pd.DataFrame([{"Task": task, "Method": method, "Returns": val}
@@ -153,7 +155,7 @@ def plot_time_taken(time_taken: dict[str, list[float]], num_rooms: int, save_nam
     plt.savefig(save_name)
 
 
-def plot_time_taken_all_num_goals(time_taken: dict[int, dict[str, list[float]]], save_name: str = None):
+def plot_time_taken_all_num_goals(time_taken: dict[int, dict[str, list[float]]], save_name: str):
     """ Plot time taken for all number of goals (log scale on y-axis)."""
     rc("text", usetex=True)
     num_rooms = sorted(time_taken.keys())
@@ -179,7 +181,7 @@ def plot_time_taken_all_num_goals(time_taken: dict[int, dict[str, list[float]]],
     ax.set_ylabel("Time (ms)", fontsize=16)
     ax.set_yticklabels(ax.get_yticks(), fontsize=16)
     ax.set_yscale('log')
-    ax.legend(fontsize=14)
+    handles, _ = ax.get_legend_handles_labels()
+    ax.legend(handles=handles, labels=[r'Ours', r'Boolean'], fontsize=20)
     plt.tight_layout()
-    if save_name:
-        plt.savefig(save_name)
+    plt.savefig(save_name)

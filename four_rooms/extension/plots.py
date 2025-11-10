@@ -87,4 +87,5 @@ def plot_returns_all():
     plot_returns_all_num_goals(returns, save_name="four_rooms/extension/figures/returns_all_num_goals.png")
 
 if __name__ == "__main__":
+    plot_time_taken_all()
     plot_returns_all()
