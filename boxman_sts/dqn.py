@@ -178,6 +178,29 @@ class ComposedDQN(nn.Module):
         return q.detach().clone()
 
 
+class ComposedDQN_onoff(nn.Module):
+    def __init__(self, dqns, compose="or", rmax=2, rmin=-0.1):
+        super(ComposedDQN, self).__init__()
+        self.compose = compose
+        self.dqns = dqns
+        self.rmax = rmax
+        self.rmin = rmin
+        self.dqn_max = MaxDQN(dqns[0], self.rmax)
+    
+    def forward(self, obs_goal):
+        qs = [self.dqns[i](obs_goal) for i in range(len(self.dqns))]
+        qs = torch.stack(tuple(qs), 0)
+        if self.compose=="or":
+            q = qs.max(0)[0]
+        elif self.compose=="and":
+            q = qs.min(0)[0]
+        else: #not
+            q_max = self.dqn_max(obs_goal)
+            q_min = q_max - (self.rmax-self.rmin)
+            q = (q_max+q_min)-qs[0]
+
+        return q.detach().clone()
+
 class MaxDQN(nn.Module):
     def __init__(self, dqn, rmax=2):
         super(MaxDQN, self).__init__()

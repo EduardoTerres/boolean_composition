@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from gym.wrappers import Monitor
 
 from dqn import Agent, DQN, FloatTensor
 from gym_repoman.envs import CollectEnv
@@ -42,6 +41,16 @@ def learn(colour, shape, condition):
     agent = train(base_path, env)
     save(base_path + 'model.dqn', agent)
 
+
+def learn_universal_empty_tasks():
+    learn(
+        colour='blue',
+        shape='square',
+        condition=lambda x: (
+            x.colour in ['blue', 'purple'] and x.shape in ['square', 'crate']
+        )
+    )
+    learn('blue', 'square', lambda x: (not x.colour == 'blue') and (not x.shape == 'square'))
 if __name__ == '__main__':
 
     learn('blue', '', lambda x: x.colour == 'blue')

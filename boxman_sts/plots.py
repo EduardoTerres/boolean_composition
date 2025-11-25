@@ -18,8 +18,8 @@ def plot1():
     sns.set(rc=rc_, style="darkgrid",font_scale = 1.8)
     rc('text', usetex=False)
         
-    data0 = dd.io.load('data/exp_returns_0.h5')[:1000,:]
-    data1 = dd.io.load('data/exp_returns_1.h5')[:1000,:]
+    data0 = dd.io.load('boxman_sts/data/exp_returns_0.h5')[:1000,:]
+    data1 = dd.io.load('boxman_sts/data/exp_returns_1.h5')[:1000,:]
     types = ["Optimal",
               "Composed",
             ]
@@ -33,7 +33,7 @@ def plot1():
     fig, ax = plt.subplots()
     ax = sns.boxplot(x="Tasks", y="Average Returns", hue="", data=data, linewidth=3, showfliers = False)
     plt.show()
-    fig.savefig("plots/returns.pdf", bbox_inches='tight')
+    fig.savefig("boxman_sts/plots/returns.pdf", bbox_inches='tight')
 
 #####################################################################################
 
@@ -46,8 +46,8 @@ def plot2():
     sns.set(rc=rc_, style="darkgrid",font_scale = 1.8)
     rc('text', usetex=False)
         
-    data0 = dd.io.load('data/exp_returns_0.h5')[:1000,:]
-    data1 = dd.io.load('data/exp_returns_1.h5')[:1000,:]
+    data0 = dd.io.load('boxman_sts/data/exp_returns_0.h5')[:1000,:]
+    data1 = dd.io.load('boxman_sts/data/exp_returns_1.h5')[:1000,:]
     types = ["Optimal",
               "Composed",
             ]
@@ -66,7 +66,7 @@ def plot2():
         plt.xlabel('Tasks')
         plt.ylabel('Average Returns')
         # plt.show()
-        fig.savefig("plots/returns_{0}.pdf".format(tasks[task]), bbox_inches='tight')
+        fig.savefig("boxman_sts/plots/returns_{0}.pdf".format(tasks[task]), bbox_inches='tight')
 
-plot1();
-plot2()
+plot1()
+# plot2()

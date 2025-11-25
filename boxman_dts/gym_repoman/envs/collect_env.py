@@ -6,7 +6,6 @@ import gym
 import numpy as np
 import pygame
 from gym.spaces import Box, Discrete
-from pygame.compat import geterror
 from pygame.locals import QUIT
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
@@ -17,9 +16,9 @@ def _load_image(name):
     fullname = os.path.join(assets_dir, name)
     try:
         image = pygame.image.load(fullname)
-    except pygame.error:
+    except pygame.error as e:
         print('Cannot load image:', fullname)
-        raise SystemExit(str(geterror()))
+        raise SystemExit(str(e))
     image = image.convert_alpha()
     return image
 
