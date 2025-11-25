@@ -204,6 +204,7 @@ class GridWorld(gym.Env):
         title=None,
         grid=False,
         cmap="YlOrRd",
+        no_ticks=False,
     ):
         img = self._gridmap_to_img(goal=goal)
         if not fig:
@@ -214,6 +215,9 @@ class GridWorld(gym.Env):
         plt.clf()
         plt.xticks(np.arange(0, 2 * self.n, 1))
         plt.yticks(np.arange(0, 2 * self.m, 1))
+        if no_ticks:
+            plt.xticks([])
+            plt.yticks([])
         plt.grid(grid)
         if title:
             plt.title(title, fontsize=20)
@@ -247,7 +251,8 @@ class GridWorld(gym.Env):
                     self._draw_reward(ax, x, y, action, v, cmap_)
             m = cm.ScalarMappable(norm=norm, cmap=cmap_)
             m.set_array(ax.get_images()[0])
-            fig.colorbar(m, ax=ax)
+            cbar = fig.colorbar(m, ax=ax)
+            cbar.ax.tick_params(labelsize=50)
 
         if V:  # For showing optimal values
             ax = fig.gca()
@@ -258,7 +263,8 @@ class GridWorld(gym.Env):
                 y, x = literal_eval(state)[1]
                 v[y, x] = val
             c = plt.imshow(v, origin="upper", cmap=cmap, extent=[0, self.n, self.m, 0])
-            fig.colorbar(c, ax=ax)
+            cbar = fig.colorbar(c, ax=ax)
+            cbar.ax.tick_params(labelsize=50)
 
         if P:  # For drawing arrows of optimal policy
             ax = fig.gca()
@@ -283,7 +289,8 @@ class GridWorld(gym.Env):
                     self._draw_reward(ax, x, y, action, r, cmap_)
             m = cm.ScalarMappable(norm=norm, cmap=cmap_)
             m.set_array(ax.get_images()[0])
-            fig.colorbar(m, ax=ax)
+            cbar = fig.colorbar(m, ax=ax)
+            cbar.ax.tick_params(labelsize=50)
 
         if T:  # For showing transition probabilities of single action
             ax = fig.gca()
@@ -296,7 +303,8 @@ class GridWorld(gym.Env):
             c = plt.imshow(
                 vprob, origin="upper", cmap=cmap, extent=[0, self.n, self.m, 0]
             )
-            fig.colorbar(c, ax=ax)
+            cbar = fig.colorbar(c, ax=ax)
+            cbar.ax.tick_params(labelsize=50)
 
         if Ta:  # For showing transition probabilities of all actions
             ax = fig.gca()

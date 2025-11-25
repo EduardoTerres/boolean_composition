@@ -1,12 +1,9 @@
-from collections import defaultdict
 import random
 import numpy as np
 import deepdish as dd
 from four_rooms.GridWorld import GridWorld
 from tqdm import tqdm
 from four_rooms.library import (
-    EQ_P,
-    EQ_V,
     Goal_Oriented_Q_learning,
 )
 from four_rooms.config import (
@@ -14,9 +11,7 @@ from four_rooms.config import (
     Config_8,
     Config_16,
 )
-import matplotlib.pyplot as plt
 from four_rooms.extension.utils import (
-    get_random_partition,
     proportional_sample,
     get_composed_tasks,
     evaluate,
@@ -24,17 +19,16 @@ from four_rooms.extension.utils import (
     render_EQ,
 )
 
-from four_rooms.extension.plot_utils import plot_composed_EQs, plot_returns, plot_time_taken
-from plots import plot
+from four_rooms.extension.plot_utils import plot_returns, plot_time_taken
 
 # ------------------------------------------------------------
 # Experiment configuration
 # ------------------------------------------------------------
 np.object = object  # Hack to avoid error in save
 
-random.seed(42)
+random.seed(422)
 
-NUM_ROOMS = 4
+NUM_ROOMS = 8
 configs = {
     4: Config_4,
     8: Config_8,
@@ -48,10 +42,10 @@ tasks = config["Tasks"]
 base_tasks = config["Bases"]
 composition_rules = config["Composition_rules"]
 
-tasks = proportional_sample(tasks, 1)
+tasks = proportional_sample(tasks, 5)
 
-# partition = get_random_partition(goals)
-# print(f"Partitioned goal state into {partition[0]} and {partition[1]}.")
+# Remove universal and empty tasks
+other_tasks = [task for task in tasks if not (len(task) == len(goals) or len(task) == 0)]
 
 # (Sparse rewards, Same terminal states)
 # types = [(True, True), (True, False), (False, True), (False, False)]
@@ -60,12 +54,10 @@ types = [(True, True)]
 maxiter = 5_000
 num_runs = 10_000
 
-Returns_all = {}
-
 # ------------------------------------------------------------
 # Training
 # ------------------------------------------------------------
-pbar = tqdm(base_tasks, desc="Training tasks", total=len(base_tasks) + 2)
+pbar = tqdm(base_tasks, desc="Training tasks", total=len(base_tasks) + 2 + len(other_tasks))
 
 # Universal task
 env = GridWorld(
@@ -74,7 +66,7 @@ env = GridWorld(
     dense_rewards=not types[0][0],
 )
 learned_universal_EQ, _ = Goal_Oriented_Q_learning(env, maxiter=maxiter)
-render_EQ(learned_universal_EQ, env, f"four_rooms/extension/figures/learned_universal_task_rooms_{NUM_ROOMS}.png")
+# render_EQ(learned_universal_EQ, env, f"four_rooms/extension/figures/learned_universal_task_rooms_{NUM_ROOMS}.png")
 pbar.update(1)
 
 # Empty task
@@ -85,7 +77,7 @@ env = GridWorld(
     dense_rewards=not types[0][0],
 )
 learned_empty_EQ, _ = Goal_Oriented_Q_learning(env, maxiter=maxiter)
-render_EQ(learned_empty_EQ, env, f"four_rooms/extension/figures/learned_empty_task_rooms_{NUM_ROOMS}.png")
+# render_EQ(learned_empty_EQ, env, f"four_rooms/extension/figures/learned_empty_task_rooms_{NUM_ROOMS}.png")
 pbar.update(1)
 
 # Base tasks
@@ -102,16 +94,30 @@ for i, task in enumerate(base_tasks):
         env, maxiter=maxiter, T_states=None if types[0][1] else terminal_states
     )
     learned_base_tasks_EQs.append(learned_EQ)
-    render_EQ(learned_EQ, env, f"four_rooms/extension/figures/learned_base_task_{i}_rooms_{NUM_ROOMS}.png")
+    # render_EQ(learned_EQ, env, f"four_rooms/extension/figures/learned_base_task_{i}_rooms_{NUM_ROOMS}.png")
     pbar.update(1)
+
+
+# Optimal tasks
+learned_optimal_tasks_EQs = []
+for i, task in enumerate(other_tasks):
+    task_goals = [[pos, pos] for pos in task]
+    env = GridWorld(
+        MAP="MAP_" + str(NUM_ROOMS),
+        goals=task_goals,
+        dense_rewards=not types[0][0],
+        T_states=terminal_states if types[0][1] else task_goals,
+    )
+    learned_EQ, _ = Goal_Oriented_Q_learning(
+        env, maxiter=maxiter, T_states=None if types[0][1] else terminal_states
+    )
+    learned_optimal_tasks_EQs.append(learned_EQ)
+    pbar.update(1)
+
 
 # ------------------------------------------------------------
 # Evaluation
 # ------------------------------------------------------------
-
-# Remove universal and empty tasks
-other_tasks = [task for task in tasks if not (len(task) == len(goals) or len(task) == 0)]
-
 # With universal and empty tasks
 EQs_composed, time_taken = get_composed_tasks(
     tasks=other_tasks,
@@ -125,11 +131,12 @@ EQs_composed, time_taken = get_composed_tasks(
 # plot_composed_EQs(EQs_composed, goals, terminal_states, NUM_ROOMS)
 
 returns = {}
-for task, EQs in tqdm(EQs_composed.items(), desc="Evaluating tasks"):
+for i, (task, EQs) in tqdm(enumerate(EQs_composed.items()), desc="Evaluating tasks"):
     task_goals = [[pos, pos] for pos in task]
     returns[task] = {
         "onoff": [],
         "boolean": [],
+        "optimal": [],
     }
     for _ in range(num_runs):
         returns[task]["onoff"].append(
@@ -137,6 +144,9 @@ for task, EQs in tqdm(EQs_composed.items(), desc="Evaluating tasks"):
         )
         returns[task]["boolean"].append(
             evaluate(task_goals, EQs["boolean"], terminal_states, NUM_ROOMS)
+        )
+        returns[task]["optimal"].append(
+            evaluate(task_goals, learned_optimal_tasks_EQs[i], terminal_states, NUM_ROOMS)
         )
 
 # Convert all EQs to regular dictionaries
@@ -146,12 +156,14 @@ learned_base_tasks_EQs = [convert_defaultdict_to_dict(eq) for eq in learned_base
 returns = {task: {method: returns_list for method, returns_list in returns[task].items()} for task in returns}
 time_taken = {method: time_taken_list for method, time_taken_list in time_taken.items()}
 
-# Save EQ_on, EQ_off, EQ_basis, returns and time_taken
-dd.io.save(f"exps_data_extension/learned_EQ_on_{NUM_ROOMS}.h5", learned_universal_EQ)
-dd.io.save(f"exps_data_extension/learned_EQ_off_{NUM_ROOMS}.h5", learned_empty_EQ)
-dd.io.save(f"exps_data_extension/learned_EQ_basis_{NUM_ROOMS}.h5", learned_base_tasks_EQs)
-dd.io.save(f"exps_data_extension/composed_returns_{NUM_ROOMS}.h5", returns)
-dd.io.save(f"exps_data_extension/composed_time_taken_{NUM_ROOMS}.h5", time_taken)
+# ------------------------------------------------------------
+# Save results
+# ------------------------------------------------------------
+dd.io.save(f"exps_data_extension/learned_EQ_on_{NUM_ROOMS}_{maxiter}.h5", learned_universal_EQ)
+dd.io.save(f"exps_data_extension/learned_EQ_off_{NUM_ROOMS}_{maxiter}.h5", learned_empty_EQ)
+dd.io.save(f"exps_data_extension/learned_EQ_basis_{NUM_ROOMS}_{maxiter}.h5", learned_base_tasks_EQs)
+dd.io.save(f"exps_data_extension/composed_returns_{NUM_ROOMS}_{maxiter}_{num_runs}.h5", returns)
+dd.io.save(f"exps_data_extension/composed_time_taken_{NUM_ROOMS}_{maxiter}_{num_runs}.h5", time_taken)
 
 plot_returns(
     returns=returns,

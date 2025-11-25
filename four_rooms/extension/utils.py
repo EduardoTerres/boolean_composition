@@ -105,7 +105,7 @@ def build_EQ_from_on_off(task, goals, EQ_on, EQ_off):
             EQ[state][str([goal, goal])] = EQ_on[state][str([goal, goal])]
         for goal in undesired_goals:
             EQ[state][str([goal, goal])] = EQ_off[state][str([goal, goal])]
-    return EQ
+    return EQ.copy()
 
 
 def build_single_goal_EQs(composition_rule, EQ_basis, EQ_on, EQ_off):
