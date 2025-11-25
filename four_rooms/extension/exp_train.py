@@ -16,7 +16,6 @@ from four_rooms.extension.utils import (
     get_composed_tasks,
     evaluate,
     convert_defaultdict_to_dict,
-    render_EQ,
 )
 
 from four_rooms.extension.plot_utils import plot_returns, plot_time_taken
@@ -26,7 +25,7 @@ from four_rooms.extension.plot_utils import plot_returns, plot_time_taken
 # ------------------------------------------------------------
 np.object = object  # Hack to avoid error in save
 
-random.seed(422)
+random.seed(42)
 
 NUM_ROOMS = 8
 configs = {
